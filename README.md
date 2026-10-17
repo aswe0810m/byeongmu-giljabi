@@ -50,7 +50,7 @@
 - JavaScript / TypeScript
 - Content Script (병무청 페이지 화면 변경), Chrome Storage API
 
-## 🚀 설치 방법 (개발 버전)
+## 설치 방법 (개발 버전)
 
 1. 이 저장소를 내려받습니다.
 2. 크롬 주소창에 `chrome://extensions` 입력
@@ -66,12 +66,16 @@
 - [ ] 점수 확인 자동 입력
 - [ ] 테스트 및 문서화
 
-## 🤝 협업 방식
+## 협업 방식
 
-- **브랜치**: `main`은 배포용, 기능별로 `feature/기능명` 브랜치에서 작업
-- **PR**: 작업이 끝나면 Pull Request를 올리고, 팀원 1명 이상 리뷰 후 병합
+팀원 전원이 저장소의 Collaborator로 등록되어 있어, 같은 저장소에서 함께 작업합니다.
 
-## 👥 팀원
+- `main` 브랜치는 항상 동작하는 상태로 유지합니다.
+- 기능별로 `feature/기능명` 브랜치를 만들어 작업합니다.
+  - 예: `feature/menu`, `feature/notice`, `feature/autofill`
+- 작업이 끝나면 `main`에 병합합니다.
+
+## 팀원
 
 | 이름 | 역할 | GitHub |
 |---|---|---|
