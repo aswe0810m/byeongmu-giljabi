@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "병무길잡이 프로토타입",
+  "version": "0.1.0",
+  "description": "상황별 메인 메뉴, 전체 메뉴, 공지 정리와 점수 확인 자동 입력을 제공하는 병무길잡이 프로토타입",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.mma.go.kr/*", "https://mwpt.mma.go.kr/*"],
+      "js": ["content.js", "main.js"],
+      "css": ["main.css"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ]
+}
