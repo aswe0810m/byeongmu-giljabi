@@ -47,7 +47,7 @@
 ## 🛠 기술 스택 (예정)
 
 - Chrome Extension (Manifest V3)
-- JavaScript / TypeScript
+- TypeScript, React, Vite
 - Content Script (병무청 페이지 화면 변경), Chrome Storage API
 
 ## 설치 방법 (개발 버전)
@@ -55,9 +55,9 @@
 1. 이 저장소를 내려받습니다.
 2. 크롬 주소창에 `chrome://extensions` 입력
 3. 오른쪽 위 **개발자 모드** 켜기
-4. **압축해제된 확장 프로그램 로드** → 확장 폴더(현재는 [`main_menu`](main_menu/)) 선택
+4. **압축해제된 확장 프로그램 로드** → [`extension/dist`](extension/dist/) 폴더 선택
 
-자세한 기능과 화면은 [`main_menu/README.md`](main_menu/README.md)를 참고하세요.
+소스(`extension/src`)를 고친 뒤에는 `extension` 폴더에서 `npm install`, `npm run build`를 실행해 `dist`를 다시 만듭니다.
 
 ## 🗺 진행 계획
 
