@@ -4,7 +4,8 @@
 export type GroupId = 'A' | 'B';
 export type IconKey =
   | 'megaphone' | 'calendar' | 'book-open' | 'shield-check' | 'clock'
-  | 'file-text' | 'file-pen' | 'search' | 'map-pin' | 'circle-help' | 'headset' | 'store';
+  | 'file-text' | 'file-pen' | 'search' | 'map-pin' | 'circle-help' | 'headset' | 'store'
+  | 'printer' | 'wallet' | 'bus' | 'chart' | 'file-x';
 export type IconTone = 'mint' | 'blue' | 'sand' | 'solid';
 
 export interface MenuLink { label: string; href: string; newTab: boolean; }

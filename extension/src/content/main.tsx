@@ -2,11 +2,15 @@
 import { Component, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { cards, layouts } from '../catalog/cards';
+import { PORTAL_EXPECTED_COUNTS, portalCards, portalLayouts } from '../catalog/portalCards';
 import { validateCatalog } from '../catalog/validate';
 import { readAllMenu } from '../menu/readAllMenu';
 import { readNews } from '../news/readNews';
 import { loadPrefs } from '../storage/prefs';
 import { App } from '../ui/App';
+import { PortalApp } from '../portal/PortalApp';
+import { openProfileGuideAfterLogin, startProfileSync } from '../profile/profileSync';
+import { findPortalFrame, readPortalMenu, restoreFrame } from '../portal/portalDom';
 import { MyInfoWidget } from '../ui/MyInfoButton';
 import styles from '../ui/styles.css?inline';
 import { ROOT_ID, ensureRoot, findOriginalDom, removeRoot, restoreOriginal } from './mount';
@@ -54,6 +58,7 @@ function fail(error: unknown): void {
   reactRoot = null;
   removeRoot();
   restoreOriginal();
+  restoreFrame();
 }
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -63,7 +68,63 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean
   render() { return this.state.failed ? null : this.props.children; }
 }
 
+/**
+ * 병무민원 화면이 병무청 첫 화면과 같은 글꼴로 보이도록 확장에 넣은 Pretendard GOV를 등록한다.
+ * (병무청 누리집의 글꼴 파일은 다른 출처라 포털에서 불러올 수 없음.) Shadow DOM 안에서도 쓰이도록 문서에 등록.
+ */
+function ensurePortalFont(): void {
+  if (document.getElementById('bmgj-font')) return;
+  const style = document.createElement('style');
+  style.id = 'bmgj-font';
+  const url = chrome.runtime.getURL('fonts/PretendardGOV-Medium.subset.woff2');
+  style.textContent = `@font-face{font-family:"Pretendard GOV";src:url("${url}") format("woff2");font-display:swap;}`;
+  (document.head ?? document.documentElement).append(style);
+}
+
+/**
+ * 병무민원포털(사용자 결정 2026-11-12): 메인의 `병무민원`으로 가면 열리는 포털 첫 화면을
+ * 메인과 같은 디자인으로 바꾼다. 포털은 바깥 틀 + iframe#main 구조라 바깥 틀에 그리고,
+ * 프레임에 첫 화면이 열려 있을 때만 프레임을 숨긴다(PortalApp).
+ */
+async function startPortal(): Promise<void> {
+  const frame = findPortalFrame();
+  if (!frame) return; // 팝업 등 틀이 없는 포털 화면
+  openProfileGuideAfterLogin(frame);
+
+  const check = validateCatalog(portalCards, portalLayouts, PORTAL_EXPECTED_COUNTS);
+  if (!check.ok) {
+    console.error('[bmgj] portal catalog invalid', check.errors);
+    return;
+  }
+
+  ensurePortalFont();
+  const menu = readPortalMenu();
+  const prefs = await loadPrefs();
+
+  let host = document.getElementById(ROOT_ID);
+  if (!host) {
+    host = document.createElement('div');
+    host.id = ROOT_ID;
+    frame.insertAdjacentElement('beforebegin', host);
+  }
+  host.classList.add('bmgj-theme-portal'); // 병무민원 화면 색(styles.css)
+  reactRoot = createShadowRoot(host);
+  reactRoot.render(
+    <ErrorBoundary>
+      <PortalApp frame={frame} initialPrefs={prefs} menu={menu} />
+    </ErrorBoundary>,
+  );
+}
+
 async function start(): Promise<void> {
+  if (location.hostname === 'mwpt.mma.go.kr') {
+    // 내 정보(0.4.8): 통합지원서 화면은 포털 프레임 안에 열리므로 모든 프레임에서 인적사항 반영을 켠다.
+    startProfileSync();
+    if (window.top !== window) return;
+    await startPortal();
+    return;
+  }
+  // 원본 병무청 사이트의 프레임에는 추가 UI를 만들지 않는다.
   if (window.top !== window) return;
   if (!isMainPage()) {
     startWidgetOnly();

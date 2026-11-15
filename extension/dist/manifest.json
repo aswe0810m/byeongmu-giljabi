@@ -1,14 +1,31 @@
 {
   "manifest_version": 3,
   "name": "병무길잡이",
-  "version": "0.3.0",
-  "permissions": ["storage"],
+  "version": "0.4.8",
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
-      "matches": ["https://www.mma.go.kr/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://www.mma.go.kr/*",
+        "https://mwpt.mma.go.kr/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle",
-      "all_frames": false
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "fonts/PretendardGOV-Medium.subset.woff2"
+      ],
+      "matches": [
+        "https://mwpt.mma.go.kr/*"
+      ]
     }
   ]
 }

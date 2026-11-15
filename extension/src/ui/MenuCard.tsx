@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
-  BookOpen, Calendar, CircleHelp, Clock, FilePen, FileText,
-  Headset, MapPin, Megaphone, Search, ShieldCheck, Store,
+  BookOpen, Bus, Calendar, ChartColumn, CircleHelp, Clock, FilePen, FileText, FileX,
+  Headset, MapPin, Megaphone, Printer, Search, ShieldCheck, Store, Wallet,
 } from 'lucide-react';
 import type { HomeCard, IconKey, MenuLink } from '../catalog/cards';
 
@@ -18,12 +18,18 @@ const ICONS: Record<IconKey, LucideIcon> = {
   'circle-help': CircleHelp,
   headset: Headset,
   store: Store,
+  printer: Printer,
+  wallet: Wallet,
+  bus: Bus,
+  chart: ChartColumn,
+  'file-x': FileX,
 };
 
 interface MenuCardProps {
   card: HomeCard;
   expanded: boolean;
   onToggle: () => void;
+  tag?: string; // 검색 결과의 `더보기` 꼬리표(3.7)
 }
 
 function linkTarget(link: MenuLink) {
@@ -41,7 +47,7 @@ function NewTabMark() {
 }
 
 // 3.4 메뉴 카드. 링크 1개면 카드 전체가 <a>, 2개 이상이면 <button aria-expanded> + 펼침 목록.
-export function MenuCard({ card, expanded, onToggle }: MenuCardProps) {
+export function MenuCard({ card, expanded, onToggle, tag }: MenuCardProps) {
   const Icon = ICONS[card.icon];
   const className = `bmgj-card${card.tone === 'solid' ? ' bmgj-card--highlight' : ''}`;
   const tile = (
@@ -49,6 +55,7 @@ export function MenuCard({ card, expanded, onToggle }: MenuCardProps) {
       <Icon size={20} strokeWidth={1.75} />
     </span>
   );
+  const tagEl = tag ? <span className="bmgj-card-tag">{tag}</span> : null;
 
   if (card.links.length === 1) {
     const link = card.links[0];
@@ -61,6 +68,7 @@ export function MenuCard({ card, expanded, onToggle }: MenuCardProps) {
             {link.newTab && <NewTabMark />}
           </span>
           <span className="bmgj-card-desc">{card.description}</span>
+          {tagEl}
         </a>
       </div>
     );
@@ -79,6 +87,7 @@ export function MenuCard({ card, expanded, onToggle }: MenuCardProps) {
         {tile}
         <span className="bmgj-card-title">{card.title}</span>
         <span className="bmgj-card-desc">{card.description}</span>
+        {tagEl}
         <span className="bmgj-card-more">
           관련 메뉴 {card.links.length}개 <span aria-hidden="true">{expanded ? '▴' : '▾'}</span>
         </span>
