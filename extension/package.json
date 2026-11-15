@@ -1,7 +1,7 @@
 {
   "name": "bmgj-extension",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.8",
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",

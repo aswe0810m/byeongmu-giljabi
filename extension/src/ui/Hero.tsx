@@ -1,10 +1,12 @@
 import { ArrowRight } from 'lucide-react';
-import type { GroupId } from '../catalog/cards';
+import type { GroupId, HomeCard } from '../catalog/cards';
 import { getCard } from '../catalog/cards';
 
 const EYEBROW = '나의 병역 여정, 조금 더 가볍게';
 
-const HERO: Record<GroupId, { title: string; description: string; button: string; cardId: string }> = {
+export interface HeroContent { eyebrow?: string; title: string; description: string; button: string; cardId: string; }
+
+const HERO: Record<GroupId, HeroContent> = {
   A: {
     title: '막막했던 입영 준비, / 여기서 차근차근.',
     description: '모집 소식과 지원 조건, 입영 절차를 알아보세요. 신청과 조회는 병무민원에서 진행해요.',
@@ -19,16 +21,23 @@ const HERO: Record<GroupId, { title: string; description: string; button: string
   },
 };
 
+interface HeroProps {
+  group: GroupId;
+  /** 배너 문구. 없으면 병무청 첫 화면용(HERO). 병무민원 화면은 자기 문구를 넘긴다. */
+  content?: Record<GroupId, HeroContent>;
+  resolveCard?: (id: string) => HomeCard;
+}
+
 // 3.3 소개 배너.
-export function Hero({ group }: { group: GroupId }) {
-  const hero = HERO[group];
-  const link = getCard(hero.cardId).links[0];
+export function Hero({ group, content = HERO, resolveCard = getCard }: HeroProps) {
+  const hero = content[group];
+  const link = resolveCard(hero.cardId).links[0];
   const lines = hero.title.split('/').map((line) => line.trim());
 
   return (
     <section className="bmgj-hero" aria-labelledby="bmgj-hero-title" tabIndex={-1}>
       <div className="bmgj-hero-text">
-        <p className="bmgj-hero-eyebrow">{EYEBROW}</p>
+        <p className="bmgj-hero-eyebrow">{hero.eyebrow ?? EYEBROW}</p>
         <h1 id="bmgj-hero-title" className="bmgj-hero-title">
           {lines.map((line, i) => (
             <span key={i} className="bmgj-hero-line">{line}</span>

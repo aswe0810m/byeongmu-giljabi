@@ -27,6 +27,10 @@ export default defineConfig({
           fileName: 'manifest.json',
           source: readFileSync('manifest.json', 'utf8'),
         });
+        // 병무민원 화면용 글꼴(병무청 누리집과 같은 Pretendard GOV Medium subset, OFL-1.1)
+        for (const name of ['PretendardGOV-Medium.subset.woff2', 'LICENSE.txt']) {
+          this.emitFile({ type: 'asset', fileName: `fonts/${name}`, source: readFileSync(`assets/fonts/${name}`) });
+        }
       },
     },
   ],

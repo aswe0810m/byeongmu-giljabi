@@ -2,7 +2,9 @@ import type { GroupId, GroupLayout, HomeCard } from './cards';
 
 export interface CatalogCheck { ok: boolean; errors: string[]; }
 
-const EXPECTED_COUNTS: Record<GroupId, { main: number; more: number }> = {
+export type ExpectedCounts = Record<GroupId, { main: number; more: number }>;
+
+const EXPECTED_COUNTS: ExpectedCounts = {
   A: { main: 10, more: 5 },
   B: { main: 5, more: 5 },
 };
@@ -11,6 +13,7 @@ const EXPECTED_COUNTS: Record<GroupId, { main: number; more: number }> = {
 export function validateCatalog(
   cardList: HomeCard[],
   layoutMap: Record<GroupId, GroupLayout>,
+  expectedCounts: ExpectedCounts = EXPECTED_COUNTS,
 ): CatalogCheck {
   const errors: string[] = [];
   const ids = new Set<string>();
@@ -24,13 +27,13 @@ export function validateCatalog(
     }
   }
 
-  for (const group of Object.keys(EXPECTED_COUNTS) as GroupId[]) {
+  for (const group of Object.keys(expectedCounts) as GroupId[]) {
     const layout = layoutMap[group];
     if (!layout) {
       errors.push(`레이아웃 없음: ${group}`);
       continue;
     }
-    const expected = EXPECTED_COUNTS[group];
+    const expected = expectedCounts[group];
     if (layout.main.length !== expected.main) {
       errors.push(`${group} main 개수 ${layout.main.length} (기대 ${expected.main})`);
     }

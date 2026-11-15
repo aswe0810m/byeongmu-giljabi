@@ -43,18 +43,63 @@
   --overlay: rgba(33, 58, 49, 0.62);
   --float-shadow: 0 4px 14px rgba(29, 53, 48, 0.12);
   --panel-shadow: 0 12px 32px rgba(29, 53, 48, 0.18);
+  /* 헤더의 사이트 표시(지금 있는 사이트 칸을 진하게 채움) */
+  --site-active-bg: var(--brand-solid);
+  --site-active-fg: #FFFFFF;
+  /* 병무민원포털 원본 위쪽 띠(#util_layout2) 색 */
+  --portal-mast-bg: #6A747C;
+  --portal-mast-fg: #FFFFFF;
 
   --content-max: 1184px;
   --gutter: 32px;
   --section-gap: 24px;
 
-  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  /* 병무청 누리집이 쓰는 Pretendard GOV. 병무민원에서는 확장이 같은 글꼴 파일을 넣어 준다 */
+  font-family: "Pretendard GOV", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   font-size: 15px;
   line-height: 1.5;
   color: var(--text);
   /* 한글이 단어 중간에서 끊기지 않게(7단계 320px 점검에서 배너 제목 "준 / 비" 끊김 발견) */
   word-break: keep-all;
   overflow-wrap: anywhere;
+}
+
+/* 병무민원 화면 색(사용자 결정 2026-11-12): 메인의 초록 대신 남색·라벤더 계열.
+   대비는 메인과 같은 기준(글자 4.5:1 이상)으로 확인함 */
+:host(.bmgj-theme-portal) {
+  --bg-page: #F4F6FB;
+  --bg-card: #FAFBFE;
+  --border: #E2E7F1;
+  --text: #1B2440;
+  --text-sub: #555F77;
+  --text-muted: #5F6880;
+  --text-eyebrow: #45568A;
+  --text-link: #3245A0;
+  --brand-start: #1F2E6B;
+  --brand-end: #3A4FB0;
+  --brand-solid: #3448A8;
+  --focus: #4C63D2;
+  --highlight-bg: #EEF1FC;
+  --highlight-border: #BAC5EE;
+  --select-bg: #E9EDFA;
+  --hero-btn: #DCE3FF;
+  --hero-desc: #E6EBFF;
+  --hero-dot: #F2C46B;
+  --hero-check: #C3D0FF;
+  --icon-mint-bg: #E8F3F3;
+  --icon-mint-fg: #3F7479;
+  --icon-blue-bg: #ECEFFA;
+  --icon-blue-fg: #5262A3;
+  --icon-sand-bg: #F4EEFA;
+  --icon-sand-fg: #7D5C9E;
+  --badge-group-bg: #EEF1FB;
+  --badge-group-fg: #42528C;
+  --strip-bg: #F5F7FC;
+  --choice-bg: #F7F8FD;
+  --choice-bg-hover: #ECEFFB;
+  --overlay: rgba(27, 36, 64, 0.62);
+  --float-shadow: 0 4px 14px rgba(27, 36, 64, 0.12);
+  --panel-shadow: 0 12px 32px rgba(27, 36, 64, 0.18);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -71,6 +116,23 @@
   /* 아래 96px: 고정된 내 정보 버튼이 푸터를 가리지 않게(3.6) */
   padding: var(--section-gap) 0 96px;
 }
+
+/* ── 병무민원 화면: 원본 포털의 전자정부 누리집 띠를 그대로 옮김(높이 40px, 가운데 1000px) ── */
+.bmgj-pmast { height: 40px; background: var(--portal-mast-bg); }
+.bmgj-pmast-inner {
+  width: 1000px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding-top: 10px;
+  font-family: NanumGothic, sans-serif;
+  font-size: 14px;
+  line-height: 19px;
+  letter-spacing: -0.7px;
+  color: var(--portal-mast-fg);
+}
+.bmgj-pmast-inner img { vertical-align: top; }
+/* 병무청 띠(31px)보다 9px 높으므로, 그만큼 위 여백을 줄여 헤더 위치를 메인과 맞춘다 */
+.bmgj-page--portal { padding-top: calc(var(--section-gap) - 9px); }
 
 .bmgj-container {
   max-width: calc(var(--content-max) + var(--gutter) * 2);
@@ -139,18 +201,39 @@ a { color: inherit; }
 .bmgj-search { grid-area: search; position: relative; width: 280px; }
 .bmgj-header-controls { grid-area: controls; display: flex; align-items: center; gap: 8px; }
 
-.bmgj-logo { display: inline-flex; align-items: center; min-height: 44px; }
-.bmgj-logo img { display: block; height: 32px; width: auto; }
-.bmgj-divider { width: 1px; height: 20px; background: var(--border); }
-.bmgj-portal {
+/* 사이트 표시(사용자 결정 2026-11-12): 병무청 | 병무민원 두 칸 중 지금 있는 칸을 진하게 채운다 */
+.bmgj-sites {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-surface);
+}
+.bmgj-site {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
   font-size: 17px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--text-sub);
   text-decoration: none;
 }
+.bmgj-site:hover { background: var(--choice-bg-hover); }
+.bmgj-site[aria-current="page"] { background: var(--site-active-bg); color: var(--site-active-fg); }
+
+/* 병무청 로고(viewBox 152×48)를 높이 28px로, 정부 마크(x 0~48.55)와 글자(x 56~152)로 잘라 보여 준다.
+   진한 칸에서는 글자만 흰색으로 바꾸고 정부 마크는 원래 색 그대로. 전체 너비(88.67px)는 원본과 같다. */
+.bmgj-logo { display: inline-flex; align-items: center; height: 28px; }
+.bmgj-logo-mark, .bmgj-logo-word { display: block; height: 28px; overflow: hidden; }
+.bmgj-logo-mark { width: 28.4px; margin-right: 4.27px; }
+.bmgj-logo-word { width: 56px; }
+.bmgj-logo img { display: block; height: 28px; width: auto; max-width: none; }
+.bmgj-logo-word img { margin-left: -32.67px; }
+.bmgj-site[aria-current="page"] .bmgj-logo-word img { filter: brightness(0) invert(1); }
 .bmgj-unofficial {
   padding: 2px 8px;
   border: 1px solid var(--border);
@@ -158,6 +241,32 @@ a { color: inherit; }
   font-size: 12px;
   color: var(--text-sub); /* 대비 4.5:1 확보 */
 }
+
+/* 병무민원 화면 헤더의 로그인 상태(남은 시간·연장·나가기) */
+.bmgj-session { display: flex; align-items: center; gap: 6px; }
+.bmgj-session-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-sub);
+}
+.bmgj-session-btn {
+  position: relative;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-surface);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-link);
+  cursor: pointer;
+}
+/* 보이는 높이 32px, 누르는 높이 44px(8절) */
+.bmgj-session-btn::after { content: ""; position: absolute; inset: -6px 0; }
 
 .bmgj-search-input {
   width: 100%;
@@ -275,11 +384,14 @@ a { color: inherit; }
 .bmgj-card-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* 모든 칸을 같은 크기로: 줄마다 높이가 달라지지 않게 가장 큰 칸에 맞춘다(사용자 결정 2026-11-12) */
+  grid-auto-rows: 1fr;
   align-items: stretch;
   gap: 12px;
   margin-top: 20px;
 }
-.bmgj-card-cell { display: flex; flex-direction: column; min-width: 0; }
+.bmgj-card-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bmgj-card-cell { position: relative; display: flex; flex-direction: column; min-width: 0; }
 .bmgj-card {
   flex: 1;
   display: flex;
@@ -328,10 +440,25 @@ a { color: inherit; }
   overflow-wrap: anywhere;
 }
 .bmgj-card-more { margin-top: auto; padding-top: 12px; font-size: 13px; font-weight: 600; color: var(--text-link); }
+.bmgj-card-tag {
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--badge-group-bg);
+  font-size: 12px;
+  color: var(--badge-group-fg);
+}
 .bmgj-newtab { font-weight: 400; color: var(--text-sub); }
 
 .bmgj-sublinks {
-  margin: 8px 0 0;
+  /* 펼친 목록은 카드 아래에 겹쳐 띄워 칸 크기를 바꾸지 않는다 */
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  box-shadow: var(--panel-shadow);
+  margin: 0;
   padding: 4px 0;
   list-style: none;
   border: 1px solid var(--border);
@@ -475,8 +602,23 @@ a { color: inherit; }
 }
 
 
-/* ── 검색 결과 수(전체 메뉴 창) ── */
+/* ── 검색 결과(3.7) ── */
 .bmgj-search-count { margin: 20px 0 0; font-size: 14px; font-weight: 600; color: var(--text-sub); }
+.bmgj-search-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 12px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-card);
+  font-size: 14px;
+  color: var(--text-sub);
+}
+.bmgj-search-empty p { margin: 0; }
 
 /* ── 푸터(3.6) ── */
 .bmgj-footer {
@@ -790,4 +932,838 @@ a.bmgj-allmenu-sec-title:hover { text-decoration: underline; }
   .bmgj-allmenu-cats { display: flex; gap: 4px; overflow-x: auto; overflow-y: visible; padding: 0 0 8px; border-right: 0; border-bottom: 1px solid var(--border); }
   .bmgj-allmenu-cat { width: auto; white-space: nowrap; }
   .bmgj-allmenu-items { grid-template-columns: 1fr; }
+}
+
+/* ── 내 정보(0.4.8): 팀 구현(bmgj-recruit-dday-update, v0.5.1)의 스타일을 그대로 옮김 ── */
+.bmgj-edge-trigger {
+  position: fixed !important;
+  z-index: 2147482999 !important;
+  top: 13vh !important;
+  right: 0 !important;
+  width: 18px !important;
+  height: 70vh !important;
+  min-height: 140px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  pointer-events: auto !important;
+}
+.bmgj-edge-mark {
+  display: block !important;
+  width: 6px !important;
+  height: 76px !important;
+  border-radius: 18px 0 0 18px !important;
+  background: #9bc6b3 !important;
+  box-shadow: -3px 0 14px rgba(28, 88, 63, 0.16) !important;
+  opacity: 0.75 !important;
+  transition:
+    width 0.22s ease,
+    background 0.22s ease,
+    opacity 0.22s ease !important;
+}
+.bmgj-edge-trigger:hover .bmgj-edge-mark,
+.bmgj-edge-trigger:focus-visible .bmgj-edge-mark {
+  width: 10px !important;
+  background: #266d54 !important;
+  opacity: 1 !important;
+}
+.bmgj-edge-trigger:focus-visible {
+  outline: 3px solid #298773 !important;
+  outline-offset: -3px !important;
+}
+.bmgj-drawer-wrap {
+  position: relative;
+  z-index: 2147483000;
+}
+.bmgj-floating {
+  top: 24px !important;
+  right: 18px !important;
+  bottom: auto !important;
+  width: 356px !important;
+  max-width: calc(100vw - 36px) !important;
+  max-height: calc(100vh - 102px) !important;
+  padding: 26px !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(190, 214, 199, 0.85) !important;
+  background: #fff !important;
+  box-shadow:
+    0 24px 75px rgba(18, 60, 44, 0.18),
+    0 6px 20px rgba(18, 60, 44, 0.08) !important;
+  animation: bmgj-rounded-drawer-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both !important;
+  scrollbar-width: thin;
+}
+.bmgj-floating .bmgj-dialog-title {
+  font-size: 23px !important;
+  letter-spacing: -0.5px;
+}
+.bmgj-floating .bmgj-info-head {
+  align-items: center !important;
+}
+.bmgj-floating .bmgj-icon-btn {
+  border-radius: 50% !important;
+  background: #f0f6f1 !important;
+  margin: 0 !important;
+}
+.bmgj-floating .bmgj-icon-btn:hover {
+  background: #e2eee5 !important;
+}
+.bmgj-floating .bmgj-info-current {
+  background: #f5f9f5 !important;
+  padding: 15px 16px !important;
+  border-radius: 18px !important;
+  display: flex;
+  flex-wrap: wrap;
+}
+.bmgj-floating .bmgj-info-groups {
+  gap: 10px !important;
+}
+.bmgj-floating .bmgj-info-groups button,
+.bmgj-floating .bmgj-info-actions button,
+.bmgj-floating .bmgj-confirm-actions button {
+  border-radius: 14px !important;
+}
+.bmgj-floating .bmgj-info-actions {
+  border-color: #e3eee6 !important;
+}
+.bmgj-floating .bmgj-dialog-desc {
+  line-height: 1.55 !important;
+}
+@keyframes bmgj-rounded-drawer-in {
+  from {
+    transform: translateX(28px) scale(0.985);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+@media (max-width: 480px) {
+  .bmgj-floating {
+    top: 12px !important;
+    right: 10px !important;
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100vh - 86px) !important;
+    padding: 20px !important;
+    border-radius: 24px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bmgj-floating {
+    animation: none !important;
+  }
+  .bmgj-edge-mark {
+    transition: none !important;
+  }
+}
+.bmgj-floating {
+  top: 14px !important;
+  right: 14px !important;
+  bottom: 14px !important;
+  width: 400px !important;
+  max-width: calc(100vw - 28px) !important;
+  height: calc(100vh - 28px) !important;
+  height: calc(100dvh - 28px) !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  padding: 30px 28px !important;
+  border-radius: 30px !important;
+}
+.bmgj-floating .bmgj-info-actions {
+  margin-top: auto !important;
+  padding-top: 24px !important;
+}
+.bmgj-floating .bmgj-info-groups {
+  margin-bottom: 20px !important;
+}
+.bmgj-floating .bmgj-confirm {
+  flex-shrink: 0 !important;
+}
+.bmgj-floating .bmgj-info-head,
+.bmgj-floating .bmgj-dialog-desc,
+.bmgj-floating .bmgj-info-current,
+.bmgj-floating .bmgj-info-label,
+.bmgj-floating .bmgj-info-groups {
+  flex-shrink: 0 !important;
+}
+@media (max-width: 480px) {
+  .bmgj-floating {
+    top: 8px !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    height: calc(100dvh - 16px) !important;
+    max-height: none !important;
+    padding: 24px 20px !important;
+    border-radius: 25px !important;
+  }
+}
+@media (max-height: 540px) {
+  .bmgj-floating {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+  }
+  .bmgj-floating .bmgj-info-actions {
+    margin-top: 16px !important;
+  }
+}
+.bmgj-floating.bmgj-profile-drawer {
+  width: 448px !important;
+  max-width: calc(100vw - 28px) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 30px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  color: #203d33 !important;
+  font-family: inherit !important;
+}
+.bmgj-profile-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 26px 27px 20px;
+  border-bottom: 1px solid #e7eee9;
+  background: linear-gradient(120deg, #fff, #f7fbf8);
+}
+.bmgj-profile-eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 750;
+  color: #528a70;
+  letter-spacing: 0.05em;
+}
+.bmgj-profile-header h2 {
+  margin: 0;
+  font-size: 27px;
+  line-height: 1.3;
+  letter-spacing: -0.8px;
+  color: #193a2f;
+}
+.bmgj-profile-subtitle {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #687c73;
+}
+.bmgj-profile-close {
+  flex-shrink: 0;
+  border: 0;
+  background: #eef5f0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font: inherit;
+  font-size: 29px;
+  line-height: 1;
+  color: #23483b;
+  cursor: pointer;
+}
+.bmgj-profile-close:hover {
+  background: #dcebe1;
+}
+.bmgj-profile-scroller {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 24px 24px 30px;
+  scrollbar-width: thin;
+}
+.bmgj-profile-login {
+  padding: 18px 17px;
+  border-radius: 20px;
+  background: #edf7f0;
+  border: 1px solid #cfe5d7;
+}
+.bmgj-profile-login strong {
+  font-size: 16px;
+  font-weight: 750;
+  color: #184b36;
+}
+.bmgj-profile-login p {
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 7px 0 0;
+  color: #4d6a5c;
+}
+.bmgj-profile-login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 14px;
+  background: #246e50;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 14px;
+}
+.bmgj-profile-login-button:hover {
+  background: #175c40;
+  color: #fff;
+}
+.bmgj-profile-login p.bmgj-profile-login-note {
+  font-size: 12px;
+  color: #5c7668;
+  margin-top: 11px;
+}
+.bmgj-profile-loading {
+  padding: 25px 0;
+  color: #63796e;
+}
+.bmgj-profile-form,
+.bmgj-profile-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 26px;
+}
+.bmgj-profile-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 2px;
+}
+.bmgj-profile-section-heading h3 {
+  margin: 0;
+  color: #203d33;
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 750;
+}
+.bmgj-profile-section-heading span {
+  font-size: 12px;
+  color: #6b8273;
+}
+.bmgj-profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #2c4e41;
+}
+.bmgj-profile-field-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #415f53;
+}
+.bmgj-profile-input {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-height: 45px;
+  border: 1px solid #d8e5dc !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  color: #203d33 !important;
+  padding: 11px 13px !important;
+  font: inherit !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+.bmgj-profile-input:focus {
+  outline: 2px solid #79b496 !important;
+  outline-offset: 1px !important;
+}
+textarea.bmgj-profile-input {
+  min-height: 82px;
+  resize: vertical;
+}
+.bmgj-profile-form-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin: 10px 0 0;
+}
+.bmgj-profile-primary,
+.bmgj-profile-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 45px;
+  border-radius: 13px !important;
+  padding: 11px 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+.bmgj-profile-primary {
+  border: 1px solid #286c50;
+  color: #fff;
+  background: #286c50;
+}
+.bmgj-profile-primary:hover {
+  background: #1a533c;
+}
+.bmgj-profile-primary:disabled,
+.bmgj-profile-secondary:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.bmgj-profile-secondary {
+  border: 1px solid #d6e3da;
+  background: #fff;
+  color: #2f5545;
+}
+.bmgj-profile-secondary:hover {
+  background: #f0f7f2;
+}
+.bmgj-profile-values {
+  margin: 0;
+  display: grid;
+  gap: 11px;
+}
+.bmgj-profile-value {
+  padding: 13px 15px;
+  border-radius: 15px;
+  background: #f6f9f6;
+  border: 1px solid #ecf1ec;
+}
+.bmgj-profile-value dt {
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: #697f72;
+}
+.bmgj-profile-value dd {
+  margin: 0;
+  font-size: 15px;
+  color: #244637;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-weight: 650;
+}
+.bmgj-profile-text-button {
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  color: #286c50;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.bmgj-profile-delete {
+  margin-top: 4px;
+}
+.bmgj-profile-deadline {
+  margin-top: 26px;
+  border: 1px dashed #cdded3;
+  background: #f8fbf8;
+  border-radius: 18px;
+  padding: 17px;
+}
+.bmgj-profile-deadline p {
+  margin: 10px 0 0;
+  color: #6b8174;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.bmgj-profile-settings {
+  margin-top: 22px;
+  border-radius: 17px;
+  border: 1px solid #e0e9e2;
+  background: #fff;
+  padding: 14px 16px;
+}
+.bmgj-profile-settings summary {
+  cursor: pointer;
+  font-weight: 750;
+  font-size: 15px;
+  color: #254737;
+  padding: 4px 0;
+}
+.bmgj-profile-settings p {
+  font-size: 13px;
+  color: #607669;
+}
+.bmgj-profile-group-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 12px 0;
+}
+.bmgj-profile-group-buttons button {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: 1px solid #dee8e0;
+  background: #fff;
+  color: #3d604f;
+  cursor: pointer;
+}
+.bmgj-profile-group-buttons button[aria-pressed="true"] {
+  background: #e4f4e9;
+  border-color: #85bd9c;
+}
+.bmgj-profile-settings > .bmgj-profile-secondary {
+  width: 100%;
+  margin-top: 4px;
+}
+.bmgj-profile-settings > .bmgj-profile-text-button {
+  display: block;
+  margin-top: 5px;
+}
+.bmgj-profile-confirm {
+  padding: 12px;
+  border-radius: 12px;
+  background: #f5f8f5;
+  border: 1px solid #dce6dc;
+  margin: 12px 0;
+}
+.bmgj-profile-confirm p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.bmgj-profile-confirm > div {
+  display: flex;
+  gap: 8px;
+}
+.bmgj-profile-confirm button {
+  min-height: 36px;
+  border-radius: 10px;
+  border: 1px solid #cdded3;
+  background: #fff;
+  color: #27523f;
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 13px;
+  cursor: pointer;
+}
+.bmgj-profile-privacy {
+  font-size: 12px;
+  color: #748679;
+  line-height: 1.65;
+  margin: 20px 0 0;
+}
+.bmgj-profile-footer {
+  display: flex;
+  align-items: center;
+  min-height: 55px;
+  padding: 12px 25px;
+  background: #fff;
+  border-top: 1px solid #e5ede6;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #527b61;
+  line-height: 1.5;
+}
+.bmgj-profile-footer span {
+  display: block;
+}
+.bmgj-profile-drawer button:focus-visible,
+.bmgj-profile-drawer a:focus-visible,
+.bmgj-profile-drawer summary:focus-visible {
+  outline: 2px solid #4b9c71;
+  outline-offset: 2px;
+}
+@media (max-width: 480px) {
+  .bmgj-floating.bmgj-profile-drawer {
+    top: 8px !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    width: calc(100vw - 16px) !important;
+    height: calc(100dvh - 16px) !important;
+    border-radius: 23px !important;
+  }
+  .bmgj-profile-header {
+    padding: 20px 18px 16px;
+  }
+  .bmgj-profile-scroller {
+    padding: 18px 16px 24px;
+  }
+  .bmgj-profile-header h2 {
+    font-size: 24px;
+  }
+  .bmgj-profile-footer {
+    padding: 10px 18px;
+  }
+}
+.bmgj-role-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 20px;
+  border-radius: 25px;
+  background: linear-gradient(145deg, #f5fbf6 0%, #eaf7ee 100%);
+  border: 1px solid #cde5d4;
+  box-shadow: 0 10px 28px rgba(26, 84, 49, 0.07);
+}
+.bmgj-role-eyebrow {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  font-weight: 800;
+  color: #27734b;
+}
+.bmgj-role-setup h3 {
+  margin: 1px 0;
+  font-size: 23px;
+  line-height: 1.45;
+  color: #193d2c;
+  word-break: keep-all;
+}
+.bmgj-role-help {
+  margin: 0 0 5px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #587363;
+}
+.bmgj-role-setup .bmgj-profile-field {
+  margin: 2px 0;
+}
+.bmgj-role-setup .bmgj-profile-input {
+  border-radius: 15px;
+  min-height: 48px;
+}
+.bmgj-role-setup .bmgj-profile-primary {
+  border-radius: 15px;
+  min-height: 47px;
+  margin-top: 6px;
+}
+.bmgj-role-setup .bmgj-profile-secondary {
+  border-radius: 15px;
+}
+.bmgj-role-hint {
+  font-size: 12px;
+  color: #547c62;
+  line-height: 1.65;
+}
+.bmgj-role-hint span {
+  display: inline;
+}
+.bmgj-role-deadline {
+  margin: 0 0 20px;
+  border-style: solid;
+  border-color: #bfdfc7;
+  border-radius: 23px;
+  padding: 19px;
+  background: linear-gradient(125deg, #f0faef 0%, #f8fcf6 58%, #fff 100%);
+}
+.bmgj-role-prototype-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 99px;
+  background: #f0eddf;
+  color: #806e36;
+  font-size: 11px;
+  padding: 5px 9px;
+  white-space: nowrap;
+  font-weight: 700;
+}
+.bmgj-role-overview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 8px;
+}
+.bmgj-role-overview > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.bmgj-role-label {
+  font-size: 12px;
+  color: #547360;
+}
+.bmgj-role-name {
+  font-size: 23px;
+  color: #1b5034;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+.bmgj-role-date {
+  font-size: 12px;
+  color: #5f7b67;
+}
+.bmgj-role-days {
+  font-weight: 850;
+  font-size: 36px;
+  color: #166b46;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+.bmgj-role-deadline-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #4f755e;
+}
+.bmgj-role-deadline-foot .bmgj-profile-text-button {
+  margin: 0;
+  min-height: 34px;
+  font-size: 12px;
+}
+.bmgj-role-disclaimer {
+  color: #8b6a3a !important;
+  font-size: 12px !important;
+  margin-top: 8px !important;
+}
+.bmgj-profile-sync-note {
+  border-radius: 11px;
+  background: #edf7ef;
+  color: #276847 !important;
+  padding: 8px 10px;
+  margin-top: 10px !important;
+  font-size: 11px !important;
+}
+
+.bmgj-recruit-official {
+  background: #e6f4e8 !important;
+  color: #236b44 !important;
+}
+.bmgj-recruit-next {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 16px 0 10px;
+  padding: 13px 15px;
+  border-radius: 17px;
+  background: #fff;
+  border: 1px solid #d7e9d9;
+}
+.bmgj-recruit-next strong {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #294d36;
+  overflow-wrap: anywhere;
+}
+.bmgj-recruit-next p {
+  margin: 0;
+  font-size: 12px;
+  color: #527460;
+}
+.bmgj-recruit-next a,
+.bmgj-recruit-index-link {
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: #206947;
+  margin-top: 6px;
+}
+.bmgj-recruit-status {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  background: #dbf1dc;
+  color: #1c7447;
+  padding: 4px 8px;
+}
+.bmgj-recruit-empty {
+  margin: 12px 0;
+  padding: 14px;
+  border-radius: 15px;
+  background: #fff;
+  border: 1px solid #d9e9df;
+}
+.bmgj-recruit-empty strong {
+  font-size: 13px;
+  color: #315944;
+}
+.bmgj-recruit-empty p {
+  font-size: 12px;
+  color: #667a70;
+  line-height: 1.6;
+  margin: 8px 0 0;
+}
+.bmgj-recruit-waiting {
+  font-size: 16px;
+  color: #6d8377;
+  white-space: nowrap;
+}
+.bmgj-recruit-upcoming {
+  margin: 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.bmgj-recruit-upcoming h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #244e36;
+}
+.bmgj-recruit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #d8e9db;
+  text-decoration: none;
+  color: #315944;
+}
+.bmgj-recruit-row-month {
+  font-size: 11px;
+  color: #40855a;
+}
+.bmgj-recruit-row strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.bmgj-recruit-row small {
+  font-size: 11px;
+  color: #667f70;
+}
+.bmgj-recruit-checked {
+  margin: 9px 0 0;
+  font-size: 11px;
+  color: #678575;
+}
+.bmgj-recruit-error {
+  font-size: 12px;
+  color: #a24d27;
+  margin: 8px 0;
+}
+.bmgj-recruit-index-link {
+  display: inline-block;
+  margin-top: 10px;
+}
+@media (max-width: 480px) {
+  .bmgj-role-setup {
+    padding: 18px;
+  }
+  .bmgj-role-setup h3 {
+    font-size: 20px;
+  }
+  .bmgj-role-days {
+    font-size: 30px;
+  }
+  .bmgj-role-deadline {
+    padding: 15px;
+  }
+  .bmgj-role-overview {
+    gap: 7px;
+  }
 }
