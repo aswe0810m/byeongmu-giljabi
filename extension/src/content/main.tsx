@@ -14,6 +14,7 @@ import { registerPARight } from '../portal/p-a-right/register';
 import { openProfileGuideAfterLogin, startProfileSync } from '../profile/profileSync';
 import { findPortalFrame, readPortalMenu, restoreFrame } from '../portal/portalDom';
 import { MyInfoWidget } from '../ui/MyInfoButton';
+import { startSubpage } from '../subpage/start';
 import styles from '../ui/styles.css?inline';
 import { ROOT_ID, ensureRoot, findOriginalDom, removeRoot, restoreOriginal } from './mount';
 import { startAM01M05 } from '../a-m01-m05';
@@ -133,6 +134,8 @@ async function start(): Promise<void> {
   // 원본 병무청 사이트의 프레임에는 추가 UI를 만들지 않는다.
   if (window.top !== window) return;
   if (!isMainPage()) {
+    // 하위 페이지 새 화면(A-M06~A-M10, 2026-11-24): 맡은 페이지가 아니면 기존처럼 내 정보 버튼만.
+    if (await startSubpage()) return;
     startWidgetOnly();
     return;
   }

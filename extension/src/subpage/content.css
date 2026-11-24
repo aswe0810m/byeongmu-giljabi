@@ -1,0 +1,281 @@
+/* 하위 페이지 본문 다듬기(사용자 결정 2026-11-24, 방식 (가)).
+   원본 본문(#contents)은 Shadow DOM 밖에 있으므로 문서에 넣는 CSS로 모양만 바꾼다.
+   모든 규칙은 html.bmgj-sub 아래에 있어서, 원래 화면으로 돌아가 클래스를 떼면 원본 모양 그대로다.
+   원본 CSS(template.css, sub_layout.css, 2026-11-24 확인)가 h3/h4 여백 등에 !important를 쓰므로 같은 곳에만 !important. */
+
+html.bmgj-sub {
+  --bmgj-bg-page: #F6F7F5;
+  --bmgj-surface: #FFFFFF;
+  --bmgj-card: #FBFCFA;
+  --bmgj-border: #E3EAE5;
+  --bmgj-text: #1D3530;
+  --bmgj-text-sub: #5D7068;
+  --bmgj-link: #32654C;
+  --bmgj-brand: #266D54;
+  --bmgj-highlight-bg: #EEF6EE;
+  --bmgj-highlight-border: #B5D2BF;
+  --bmgj-bullet: #527567;
+  --bmgj-strip: #F6F8F4;
+  --bmgj-focus: #298773;
+}
+
+html.bmgj-sub body { background: var(--bmgj-bg-page) !important; }
+
+/* ── 틀: [왼쪽 메뉴 | 본문] 두 칸. 원본은 float + 고정 너비(210px + 740px) ── */
+html.bmgj-sub #secrion {
+  float: none !important;
+  width: auto !important;
+  max-width: 1248px;
+  margin: 0 auto !important;
+  padding: 0 32px !important;
+  box-sizing: border-box;
+  background: transparent !important;
+}
+html.bmgj-sub #secrion #container {
+  float: none !important;
+  width: auto !important;
+}
+html.bmgj-sub #secrion #container > .text_bg {
+  float: none !important;
+  display: grid !important;
+  grid-template-columns: 264px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+}
+html.bmgj-sub #bmgj-sub-side { min-width: 0; }
+html.bmgj-sub #secrion #colgroup {
+  float: none !important;
+  display: block !important;
+  width: auto !important;
+  min-width: 0;
+  padding: 32px !important;
+  border-radius: 24px;
+  background: var(--bmgj-surface);
+  box-sizing: border-box;
+}
+html.bmgj-sub #secrion #sub { width: auto !important; }
+html.bmgj-sub #secrion #contents {
+  position: static !important;
+  top: auto !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+}
+/* 고정된 내 정보 버튼이 푸터를 가리지 않게(메인 .bmgj-page와 같은 96px) */
+html.bmgj-sub #bmgj-sub-footer { padding: 0 32px 96px; }
+
+/* ── 본문 글자 ── */
+html.bmgj-sub #contents {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--bmgj-text);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+/* 원본의 양쪽 맞춤(justify)은 한글 사이를 크게 벌리므로 왼쪽 맞춤으로. 표 칸의 가운데 맞춤은 그대로 둔다. */
+html.bmgj-sub #contents,
+html.bmgj-sub #contents p,
+html.bmgj-sub #contents li { text-align: left; }
+html.bmgj-sub #contents p { margin: 0 0 12px; }
+html.bmgj-sub #contents a { color: var(--bmgj-link); text-underline-offset: 3px; }
+html.bmgj-sub #contents a:focus-visible { outline: 2px solid var(--bmgj-focus); outline-offset: 2px; }
+html.bmgj-sub #contents img { max-width: 100%; height: auto; }
+/* 클릭 영역이 있는 이미지 지도(usemap)는 좌표가 원래 크기 기준이라 늘리지 않는다(A-M10 페이지) */
+html.bmgj-sub #contents img[usemap] { width: auto !important; }
+
+/* 제목: 원본의 아이콘 배경·음수 여백을 걷어내고 왼쪽 막대로 */
+html.bmgj-sub #contents h3 {
+  position: relative;
+  display: block !important;
+  width: auto !important;
+  margin: 40px 0 14px !important;
+  padding: 0 0 0 14px !important;
+  background: none !important;
+  font-size: 22px !important;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--bmgj-text) !important;
+}
+html.bmgj-sub #contents h3::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  bottom: 0.2em;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--bmgj-brand);
+}
+html.bmgj-sub #contents h4 {
+  display: block !important;
+  width: auto !important;
+  margin: 28px 0 10px !important;
+  padding: 0 !important;
+  background: none !important;
+  font-size: 18px !important;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--bmgj-text) !important;
+}
+html.bmgj-sub #contents .layout_h3 { margin: 0 0 8px !important; }
+html.bmgj-sub #contents .layout_h4 { margin: 0 0 8px !important; }
+html.bmgj-sub #contents > .layout_h3:first-child > h3:first-child,
+html.bmgj-sub #contents > h3:first-child { margin-top: 0 !important; }
+
+/* 목록: 원본 gif 글머리 대신 점·짧은 선 */
+html.bmgj-sub #contents ul.list,
+html.bmgj-sub #contents ul.list_x {
+  margin: 0 0 16px !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+html.bmgj-sub #contents ul.list li,
+html.bmgj-sub #contents ul.list_x li {
+  position: relative;
+  margin: 0 0 8px !important;
+  padding: 0 0 0 18px !important;
+  background: none !important;
+  line-height: 1.75 !important;
+}
+html.bmgj-sub #contents ul.list li::before,
+html.bmgj-sub #contents ul.list_x li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.72em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bmgj-bullet);
+}
+html.bmgj-sub #contents ul.list ul,
+html.bmgj-sub #contents ul.list_x ul { margin: 8px 0 0 !important; padding: 0 !important; }
+html.bmgj-sub #contents ul.list ul li::before,
+html.bmgj-sub #contents ul.list_x ul li::before {
+  top: 0.82em;
+  width: 7px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--bmgj-text-sub);
+}
+html.bmgj-sub #contents ul.list li.nobg::before,
+html.bmgj-sub #contents ul.list_x li.nobg::before { display: none; }
+
+/* ── 표 ── */
+html.bmgj-sub #contents .table_scroll {
+  overflow-x: auto !important;
+  margin: 0 0 20px !important;
+  padding: 0 !important;
+  border-radius: 12px;
+}
+html.bmgj-sub #contents .table_scroll::-webkit-scrollbar { height: 8px; background: var(--bmgj-strip); }
+html.bmgj-sub #contents .table_scroll::-webkit-scrollbar-track { height: 8px; background: var(--bmgj-strip); }
+html.bmgj-sub #contents .table_scroll::-webkit-scrollbar-thumb { height: 8px; border-radius: 4px; background: var(--bmgj-highlight-border); }
+html.bmgj-sub #contents table {
+  max-width: 100%;
+  margin: 0 0 20px;
+  border-collapse: collapse;
+  border-top: 2px solid var(--bmgj-brand) !important;
+  font-size: 15px;
+  line-height: 1.6;
+}
+html.bmgj-sub #contents .table_scroll > table { max-width: none; margin: 0 !important; }
+html.bmgj-sub #contents th,
+html.bmgj-sub #contents td {
+  padding: 10px 12px !important;
+  border: 1px solid var(--bmgj-border) !important;
+  vertical-align: middle;
+  color: var(--bmgj-text);
+}
+html.bmgj-sub #contents thead th,
+html.bmgj-sub #contents thead td {
+  background: var(--bmgj-highlight-bg) !important;
+  font-weight: 700 !important;
+  color: var(--bmgj-text) !important;
+}
+html.bmgj-sub #contents tbody th { background: var(--bmgj-card) !important; font-weight: 600; }
+
+/* ── 본문 안 버튼 링크(span.button > a): 원본 회색 버튼·인라인 색 대신 둥근 버튼 ── */
+html.bmgj-sub #contents span.button {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  vertical-align: middle;
+}
+html.bmgj-sub #contents span.button a,
+html.bmgj-sub #contents a.aButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 14px !important;
+  border: 1px solid var(--bmgj-highlight-border) !important;
+  border-radius: 999px;
+  background: var(--bmgj-highlight-bg) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.4;
+  color: var(--bmgj-link) !important;
+  text-decoration: none;
+}
+html.bmgj-sub #contents span.button a:hover,
+html.bmgj-sub #contents a.aButton:hover { border-color: var(--bmgj-brand) !important; }
+html.bmgj-sub #contents span.button a[target="_blank"]::after { content: "\00A0↗"; font-weight: 400; }
+
+/* ── 게시판 원본 목록·글 보기(검색 결과, 원래 목록 보기, 글 보기 화면) ── */
+html.bmgj-sub #contents .board_box {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border: 0 !important;
+  border-radius: 12px;
+  background: var(--bmgj-strip) !important;
+}
+html.bmgj-sub #contents .board_box p { margin: 0; color: var(--bmgj-text) !important; }
+html.bmgj-sub #contents table.board_notice td a { color: var(--bmgj-text); text-decoration: none; }
+html.bmgj-sub #contents table.board_notice td a:hover { text-decoration: underline; }
+html.bmgj-sub #contents table.board_notice tr.bg td,
+html.bmgj-sub #contents table.board_notice tr.bg th { background: var(--bmgj-highlight-bg) !important; }
+/* 원본은 고정 공지 줄의 글자를 파란색(strong)으로 칠한다 */
+html.bmgj-sub #contents table.board_notice strong { color: var(--bmgj-text) !important; }
+html.bmgj-sub #contents table.notice_view td.con_text { padding: 20px 16px !important; }
+html.bmgj-sub #contents table.notice_view td.con_text table { border-top: 0 !important; }
+html.bmgj-sub #contents .page a span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+html.bmgj-sub #contents .page a span.on { background: var(--bmgj-brand); color: #FFFFFF; }
+
+/* ── 본문 아래 만족도 조사(원본 기능 그대로, 모양만) ── */
+html.bmgj-sub #secrion .page_info {
+  max-width: none !important;
+  margin: 32px 0 0 !important;
+  border: 1px solid var(--bmgj-border) !important;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* ── 좁은 화면 ── */
+@media (max-width: 1279px) {
+  html.bmgj-sub #secrion { padding: 0 24px !important; }
+  html.bmgj-sub #bmgj-sub-footer { padding: 0 24px 96px; }
+}
+@media (max-width: 1023px) {
+  html.bmgj-sub #secrion #container > .text_bg { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 767px) {
+  html.bmgj-sub #secrion { padding: 0 16px !important; }
+  html.bmgj-sub #bmgj-sub-footer { padding: 0 16px 96px; }
+  html.bmgj-sub #secrion #colgroup { padding: 20px !important; border-radius: 20px; }
+  html.bmgj-sub #contents h3 { font-size: 20px !important; }
+}
