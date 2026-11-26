@@ -1,6 +1,7 @@
 // 내 정보 — 인적사항·지원 희망 분야 저장 형식(팀 구현 v0.5.1을 소스로 옮김, 0.4.8).
 // 모두 chrome.storage.local(이 브라우저)에만 저장한다.
-// (사용자 결정 2026-11-26) 저장 항목을 전화번호·휴대전화·전자우편·응시지역 병무청·학력사항·자격증·신체조건사항으로 줄임.
+// (사용자 결정 2026-11-26) 저장 항목을 전화번호·휴대전화·전자우편·응시지역 병무청·학력사항·자격/면허로 줄임.
+// 신체조건은 통합지원서 기본정보 화면에 없어서 뺐다(예전 저장값의 body는 읽을 때 버리고, 저장할 때 지워진다).
 // 성명·생년월일·병적지청·주소·나라사랑메일은 더 저장하지 않는다(v1 값은 읽을 때 필요한 칸만 옮기고, 저장할 때 지움).
 
 import { migrateLevel } from '../my-info/options';
@@ -47,18 +48,9 @@ export interface License {
   acquired: string;   // 취득시기 YYYY-MM-DD
 }
 
-export interface Body {
-  height: string;       // 신장 cm
-  weight: string;       // 체중 kg
-  visionLeft: string;   // 시력(좌)
-  visionRight: string;  // 시력(우)
-  colorVision: string;  // 색각
-}
-
 export interface Profile extends Record<TextKey, string> {
   education: Education[];
   licenses: License[];
-  body: Body;
 }
 
 export const MAX_EDUCATION = 6; // 학교 구분마다 한 줄
@@ -66,11 +58,10 @@ export const MAX_LICENSES = 10;
 
 export const emptyEducation = (): Education => ({ level: '', school: '', system: '', degree: '', major: '', grade: '', status: '', period: '' });
 export const emptyLicense = (): License => ({ name: '', acquired: '' });
-export const emptyBody = (): Body => ({ height: '', weight: '', visionLeft: '', visionRight: '', colorVision: '' });
 
 export const emptyProfile = (): Profile => ({
   contactPhone: '', mobilePhone: '', email: '', applicationOffice: '',
-  education: [], licenses: [], body: emptyBody(),
+  education: [], licenses: [],
 });
 
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
@@ -106,7 +97,6 @@ export function cleanProfile(data: unknown): Profile {
   if (Array.isArray(d.licenses)) {
     value.licenses = d.licenses.slice(0, MAX_LICENSES).map((l) => cleanRecord(emptyLicense(), l, 80));
   }
-  value.body = cleanRecord(emptyBody(), d.body, 10);
   return value;
 }
 
@@ -132,7 +122,7 @@ export function tidyProfile(profile: Profile): Profile {
 }
 
 export function profileHasValue(p: Profile): boolean {
-  return PROFILE_FIELDS.some((f) => p[f.key].trim()) || p.education.some(hasValue) || p.licenses.some(hasValue) || hasValue(p.body);
+  return PROFILE_FIELDS.some((f) => p[f.key].trim()) || p.education.some(hasValue) || p.licenses.some(hasValue);
 }
 
 /** 저장소에서 읽은 값(v2, 없으면 v1)을 인적사항으로 만든다. */

@@ -1,12 +1,12 @@
 // 내 정보 — 인적사항 입력·보기(사용자 결정 2026-11-26).
-// 전화번호·휴대전화·전자우편·응시지역 병무청(목록에서 고르기)·학력사항·자격/면허·신체조건사항.
+// 전화번호·휴대전화·전자우편·응시지역 병무청(목록에서 고르기)·학력사항·자격/면허.
 // 학력사항은 통합지원서처럼 학교 구분마다 한 줄, 자격/면허는 줄을 더하고 뺄 수 있다(칸은 options.ts 참고).
-import type { Body, Education, License, Profile, ProfileField } from '../profile/profile';
+import type { Education, License, Profile, ProfileField } from '../profile/profile';
 import {
   MAX_EDUCATION, MAX_LICENSES, PROFILE_FIELDS, emptyEducation, emptyLicense,
 } from '../profile/profile';
 import {
-  APPLICATION_OFFICES, COLOR_VISIONS, SCHOOL_DEGREES, SCHOOL_LEVELS, SCHOOL_SYSTEMS, TRAINING_PERIODS, levelSpec,
+  APPLICATION_OFFICES, SCHOOL_DEGREES, SCHOOL_LEVELS, SCHOOL_SYSTEMS, TRAINING_PERIODS, levelSpec,
 } from './options';
 
 interface FormProps {
@@ -52,7 +52,6 @@ export function ProfileFormFields({ profile, busy, onChange }: FormProps) {
     set({ education: profile.education.map((e, n) => (n === i ? { ...e, ...patch } : e)) });
   const setLic = (i: number, patch: Partial<License>) =>
     set({ licenses: profile.licenses.map((l, n) => (n === i ? { ...l, ...patch } : l)) });
-  const setBody = (patch: Partial<Body>) => set({ body: { ...profile.body, ...patch } });
 
   const textField = (f: ProfileField) => (f.type === 'select' ? (
     <Select
@@ -147,19 +146,6 @@ export function ProfileFormFields({ profile, busy, onChange }: FormProps) {
         )}
       </fieldset>
 
-      <fieldset className="bmgj-info-group">
-        <legend>신체조건사항</legend>
-        <p className="bmgj-info-hint">통합지원서 기본정보 화면에는 이 칸이 없어서 내 정보에만 적어 둬요.</p>
-        <div className="bmgj-info-pair">
-          <Text label="신장(cm)" value={profile.body.height} inputMode="decimal" maxLength={5} disabled={busy} placeholder="175" onChange={(v) => setBody({ height: v })} />
-          <Text label="체중(kg)" value={profile.body.weight} inputMode="decimal" maxLength={5} disabled={busy} placeholder="70" onChange={(v) => setBody({ weight: v })} />
-        </div>
-        <div className="bmgj-info-pair">
-          <Text label="시력(좌)" value={profile.body.visionLeft} inputMode="decimal" maxLength={4} disabled={busy} placeholder="1.0" onChange={(v) => setBody({ visionLeft: v })} />
-          <Text label="시력(우)" value={profile.body.visionRight} inputMode="decimal" maxLength={4} disabled={busy} placeholder="1.0" onChange={(v) => setBody({ visionRight: v })} />
-        </div>
-        <Select label="색각" value={profile.body.colorVision} options={COLOR_VISIONS} disabled={busy} onChange={(v) => setBody({ colorVision: v })} />
-      </fieldset>
     </>
   );
 }
@@ -168,12 +154,6 @@ const or = (v: string) => v.trim() || '미입력';
 const join = (...parts: string[]) => parts.map((p) => p.trim()).filter(Boolean).join(' · ');
 
 export function ProfileValues({ profile }: { profile: Profile }) {
-  const b = profile.body;
-  const bodyText = join(
-    b.height && `신장 ${b.height}cm`, b.weight && `체중 ${b.weight}kg`,
-    (b.visionLeft || b.visionRight) && `시력 좌 ${b.visionLeft || '-'} / 우 ${b.visionRight || '-'}`,
-    b.colorVision && `색각 ${b.colorVision}`,
-  );
   return (
     <dl className="bmgj-profile-values">
       {PROFILE_FIELDS.map((f) => (
@@ -203,10 +183,6 @@ export function ProfileValues({ profile }: { profile: Profile }) {
             </span>
           )) : '미입력'}
         </dd>
-      </div>
-      <div className="bmgj-profile-value">
-        <dt>신체조건사항</dt>
-        <dd>{bodyText || '미입력'}</dd>
       </div>
     </dl>
   );

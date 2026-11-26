@@ -274,7 +274,7 @@ async function pullIntoMyInfo(): Promise<string> {
   if (!pulled) return '인적사항 표에서 성명·생년월일을 찾지 못해 가져오지 않았어요. 기본정보 화면인지 확인해 주세요.';
   const saved = await chrome.storage.local.get([PROFILE_KEY, PROFILE_KEY_V1, PROFILE_SYNC_KEY]);
   const sync = saved[PROFILE_SYNC_KEY] as { owner?: string } | undefined;
-  // 다른 사람이 로그인했으면 이전 사람의 인적사항(신체조건 포함)을 이어 쓰지 않는다.
+  // 다른 사람이 로그인했으면 이전 사람의 인적사항을 이어 쓰지 않는다.
   const differentPerson = !!sync?.owner && sync.owner !== pulled.owner;
   const base = differentPerson ? emptyProfile() : profileFromStorage(saved);
   const next: Profile = cleanProfile({

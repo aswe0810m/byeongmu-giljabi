@@ -18,7 +18,7 @@ import {
   recruitBadge, recruitDateText, recruitMonthLabel, refreshRecruit,
 } from '../profile/recruit';
 import { LoginBox } from '../my-info/LoginBox';
-import { schedulesForTarget } from '../my-info/match';
+import { targetSchedules } from '../my-info/match';
 import myInfoCss from '../my-info/myInfo.css?inline';
 import { ProfileFormFields, ProfileValues } from '../my-info/ProfileForm';
 import { RolePicker } from '../my-info/RolePicker';
@@ -256,7 +256,10 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
     }
   };
 
-  const filteredSchedules = target ? schedulesForTarget(recruitCache, target) : [];
+  const scheduleStatus = target ? targetSchedules(recruitCache, target) : null;
+  const filteredSchedules = scheduleStatus?.list ?? [];
+  /** 고른 전문특기병 특기가 최신 회차 공고에 없으면 그 공고(사용자 결정 2026-11-26) */
+  const missingIn = scheduleStatus?.missingIn ?? null;
   const nextSchedule = filteredSchedules[0] || null;
   const remaining = nextSchedule ? countdown(nextSchedule.endsAt.slice(0, 10)) : null;
   const recruitStale = !!recruitCache?.checkedAt && Date.now() - recruitCache.checkedAt > RECRUIT_MAX_AGE;
@@ -323,7 +326,7 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
                   <span className="bmgj-role-label">지원 희망 분야</span>
                   <strong className="bmgj-role-name">{target.role}</strong>
                   <span className="bmgj-role-date">
-                    {nextSchedule ? recruitMonthLabel(nextSchedule) : '다음 접수 회차가 공식 발표되면 표시해요'}
+                    {nextSchedule ? recruitMonthLabel(nextSchedule) : missingIn ? '최신 모집 공고에 없는 특기예요' : '다음 접수 회차가 공식 발표되면 표시해요'}
                   </span>
                 </div>
                 {remaining ? (
@@ -334,7 +337,7 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
                     {remaining.label}
                   </strong>
                 ) : (
-                  <strong className="bmgj-recruit-waiting">{recruitLoading ? '확인 중…' : '일정 대기'}</strong>
+                  <strong className="bmgj-recruit-waiting">{recruitLoading ? '확인 중…' : missingIn ? '일정 없음' : '일정 대기'}</strong>
                 )}
               </div>
               {nextSchedule ? (
@@ -344,6 +347,12 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
                   <p>{`접수 시작  ${recruitDateText(nextSchedule.startsAt)}`}</p>
                   <p>{`접수 마감  ${recruitDateText(nextSchedule.endsAt)}`}</p>
                   <a href={nextSchedule.url} target="_blank" rel="noopener noreferrer">공식 모집 공고 확인 ↗</a>
+                </div>
+              ) : missingIn && !recruitLoading ? (
+                <div className="bmgj-recruit-empty">
+                  <strong>{`최신 모집 공고에 ${target.specialty ?? '이 특기'} 모집이 없어요`}</strong>
+                  <p>{`${missingIn.title} 기준이에요. 이 특기는 지금 모집 일정이 없고, 새 공고에 나오면 자동으로 표시해요.`}</p>
+                  <a href={missingIn.url} target="_blank" rel="noopener noreferrer">최신 모집 공고 보기 ↗</a>
                 </div>
               ) : (
                 <div className="bmgj-recruit-empty">

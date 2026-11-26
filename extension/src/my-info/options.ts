@@ -85,6 +85,3 @@ export function migrateLevel(level: string): { level: string; system: string } {
   if (level === '전문대학(2·3년제)') return { level: '대학교', system: '' };
   return { level, system: '' };
 }
-
-// ── 신체조건사항: 통합지원서 기본정보 화면에는 칸이 없다(모집분야를 고른 뒤 단계는 확인 못 함). 내 정보에만 적어 둔다.
-export const COLOR_VISIONS = ['정상', '색약', '색맹'];
