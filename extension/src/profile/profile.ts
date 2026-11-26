@@ -3,6 +3,8 @@
 // (사용자 결정 2026-11-26) 저장 항목을 전화번호·휴대전화·전자우편·응시지역 병무청·학력사항·자격증·신체조건사항으로 줄임.
 // 성명·생년월일·병적지청·주소·나라사랑메일은 더 저장하지 않는다(v1 값은 읽을 때 필요한 칸만 옮기고, 저장할 때 지움).
 
+import { migrateLevel } from '../my-info/options';
+
 export const PROFILE_KEY = 'bmgj.personalProfile.v2';
 export const PROFILE_KEY_V1 = 'bmgj.personalProfile.v1';
 export const PROFILE_SYNC_KEY = 'bmgj.personalProfileSync.v1';
@@ -22,28 +24,27 @@ export interface ProfileField {
 }
 
 export const PROFILE_FIELDS: ProfileField[] = [
-  { key: 'contactPhone', label: '전화번호', type: 'tel', placeholder: '02-000-0000', autoComplete: 'tel-national', maxLength: 24 },
+  { key: 'contactPhone', label: '전화번호(비상연락처)', type: 'tel', placeholder: '02-000-0000', autoComplete: 'tel-national', maxLength: 24 },
   { key: 'mobilePhone', label: '휴대전화', type: 'tel', placeholder: '010-0000-0000', autoComplete: 'tel', maxLength: 24 },
-  { key: 'email', label: '전자우편', type: 'email', placeholder: 'example@email.com', autoComplete: 'email', maxLength: 120 },
+  { key: 'email', label: '전자우편(상용)', type: 'email', placeholder: 'example@email.com', autoComplete: 'email', maxLength: 120 },
   { key: 'applicationOffice', label: '응시지역 병무청', type: 'select', maxLength: 40 },
 ];
 
+// 학력사항·자격/면허는 통합지원서 '기본정보' 화면의 칸에 맞춘다(2026-11-26 확인, 자세한 목록은 src/my-info/options.ts).
 export interface Education {
-  level: string;      // 학교 구분
-  school: string;     // 학교명
-  major: string;      // 학과(전공)
-  grade: string;      // 학년
-  status: string;     // 학적 상태
-  admitted: string;   // 입학 연월 YYYY-MM
-  graduated: string;  // 졸업(예정) 연월 YYYY-MM
+  level: string;      // 학교 구분: 초등학교·중학교·고등학교·대학교·대학원·직업전문/인력개발원
+  school: string;     // 학교명(통합지원서에서는 검색 팝업으로만 넣는다)
+  system: string;     // 학제(대학교·대학원): 2년제~6년제
+  degree: string;     // 석사/박사(대학원)
+  major: string;      // 전공학과(고등학교 이상, 통합지원서에서는 검색 팝업으로만 넣는다)
+  grade: string;      // 학년: '1학년'~'6학년'
+  status: string;     // 졸업구분: 재학·휴학·졸업·중퇴·수료(초등학교는 미취학도)
+  period: string;     // 수료기간(직업전문/인력개발원)
 }
 
 export interface License {
-  name: string;       // 자격·면허명
-  grade: string;      // 등급
-  acquired: string;   // 취득일 YYYY-MM-DD
-  number: string;     // 자격 번호
-  issuer: string;     // 발급 기관
+  name: string;       // 자격·면허 명칭(통합지원서에서는 검색 팝업으로만 넣는다)
+  acquired: string;   // 취득시기 YYYY-MM-DD
 }
 
 export interface Body {
@@ -60,11 +61,11 @@ export interface Profile extends Record<TextKey, string> {
   body: Body;
 }
 
-export const MAX_EDUCATION = 4;
+export const MAX_EDUCATION = 6; // 학교 구분마다 한 줄
 export const MAX_LICENSES = 10;
 
-export const emptyEducation = (): Education => ({ level: '', school: '', major: '', grade: '', status: '', admitted: '', graduated: '' });
-export const emptyLicense = (): License => ({ name: '', grade: '', acquired: '', number: '', issuer: '' });
+export const emptyEducation = (): Education => ({ level: '', school: '', system: '', degree: '', major: '', grade: '', status: '', period: '' });
+export const emptyLicense = (): License => ({ name: '', acquired: '' });
 export const emptyBody = (): Body => ({ height: '', weight: '', visionLeft: '', visionRight: '', colorVision: '' });
 
 export const emptyProfile = (): Profile => ({
@@ -92,7 +93,15 @@ export function cleanProfile(data: unknown): Profile {
   const d = data as Record<string, unknown>;
   for (const f of PROFILE_FIELDS) value[f.key] = str(d[f.key], f.maxLength);
   if (Array.isArray(d.education)) {
-    value.education = d.education.slice(0, MAX_EDUCATION).map((e) => cleanRecord(emptyEducation(), e, 80));
+    value.education = d.education.slice(0, MAX_EDUCATION).map((e) => {
+      const row = cleanRecord(emptyEducation(), e, 80);
+      // 첫 v2 형식(학교 구분 '대학교(4년제)', 학년 '1')을 통합지원서 표기로 옮긴다.
+      const moved = migrateLevel(row.level);
+      row.level = moved.level;
+      if (!row.system) row.system = moved.system;
+      if (/^[1-6]$/.test(row.grade)) row.grade = `${row.grade}학년`;
+      return row;
+    });
   }
   if (Array.isArray(d.licenses)) {
     value.licenses = d.licenses.slice(0, MAX_LICENSES).map((l) => cleanRecord(emptyLicense(), l, 80));

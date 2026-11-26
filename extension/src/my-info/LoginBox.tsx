@@ -38,7 +38,7 @@ export function LoginBox({ connectUrl, syncedAt }: LoginBoxProps) {
 
   const syncNote = syncedAt && (
     <p className="bmgj-profile-sync-note" role="status">
-      {`최근 인적사항 자동 반영: ${new Date(syncedAt).toLocaleString('ko-KR')}`}
+      {`최근 통합지원서에서 가져온 때: ${new Date(syncedAt).toLocaleString('ko-KR')}`}
     </p>
   );
 
@@ -67,13 +67,13 @@ export function LoginBox({ connectUrl, syncedAt }: LoginBoxProps) {
     <div className="bmgj-profile-login">
       <div>
         <strong>병무청 공식 로그인</strong>
-        <p>병무민원에서 본인인증을 마치면 통합지원서 작성 안내가 자동으로 열려요. 안내에서 ‘예’를 누르면 인적사항이 이 패널에 자동으로 반영돼요.</p>
+        <p>병무민원에서 본인인증을 마치면 통합지원서 작성 안내가 자동으로 열려요. 안내에서 ‘예’를 누르면 지원서 위쪽의 ‘내 정보로 채우기’·‘내 정보에 가져오기’ 버튼을 쓸 수 있어요.</p>
       </div>
       <a href={connectUrl} target="_blank" rel="noopener noreferrer" className="bmgj-profile-login-button">
         병무민원 접속하기 ↗
       </a>
       <p className="bmgj-profile-login-note">
-        병무청 안내와 유의사항을 확인하면 인적사항을 이 브라우저에 저장해요.
+        버튼을 누를 때만 지원서와 내 정보 사이에 값을 옮기고, 내 정보는 이 브라우저에만 저장해요.
       </p>
       {syncNote}
     </div>

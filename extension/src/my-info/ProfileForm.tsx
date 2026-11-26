@@ -1,12 +1,12 @@
 // 내 정보 — 인적사항 입력·보기(사용자 결정 2026-11-26).
-// 전화번호·휴대전화·전자우편·응시지역 병무청(목록에서 고르기)·학력사항·자격증·신체조건사항.
-// 학력사항·자격증은 통합지원서처럼 줄을 더하고 뺄 수 있다.
+// 전화번호·휴대전화·전자우편·응시지역 병무청(목록에서 고르기)·학력사항·자격/면허·신체조건사항.
+// 학력사항은 통합지원서처럼 학교 구분마다 한 줄, 자격/면허는 줄을 더하고 뺄 수 있다(칸은 options.ts 참고).
 import type { Body, Education, License, Profile, ProfileField } from '../profile/profile';
 import {
   MAX_EDUCATION, MAX_LICENSES, PROFILE_FIELDS, emptyEducation, emptyLicense,
 } from '../profile/profile';
 import {
-  APPLICATION_OFFICES, COLOR_VISIONS, NO_MAJOR_LEVELS, SCHOOL_GRADES, SCHOOL_LEVELS, SCHOOL_STATUSES,
+  APPLICATION_OFFICES, COLOR_VISIONS, SCHOOL_DEGREES, SCHOOL_LEVELS, SCHOOL_SYSTEMS, TRAINING_PERIODS, levelSpec,
 } from './options';
 
 interface FormProps {
@@ -16,7 +16,7 @@ interface FormProps {
 }
 
 function Select({ label, value, options, disabled, onChange }: {
-  label: string; value: string; options: string[]; disabled: boolean; onChange: (v: string) => void;
+  label: string; value: string; options: readonly string[]; disabled: boolean; onChange: (v: string) => void;
 }) {
   // 저장된 값이 목록에 없으면(통합지원서에서 읽은 다른 표기 등) 그 값도 보여 준다.
   const list = value && !options.includes(value) ? [value, ...options] : options;
@@ -78,30 +78,45 @@ export function ProfileFormFields({ profile, busy, onChange }: FormProps) {
 
       <fieldset className="bmgj-info-group">
         <legend>학력사항</legend>
+        <p className="bmgj-info-hint">통합지원서처럼 학교 구분마다 한 줄씩 적어요. 학교명·전공학과는 통합지원서에서 검색 버튼으로 직접 골라야 해요.</p>
         {profile.education.length === 0 && <p className="bmgj-info-empty">입력한 학력이 없어요.</p>}
-        {profile.education.map((e, i) => (
-          <div className="bmgj-info-row" key={i}>
-            <div className="bmgj-info-row-head">
-              <strong>{`학력 ${i + 1}`}</strong>
-              <button type="button" className="bmgj-info-remove" disabled={busy} onClick={() => set({ education: profile.education.filter((_, n) => n !== i) })}>
-                삭제
-              </button>
+        {profile.education.map((e, i) => {
+          const spec = levelSpec(e.level);
+          const usedElsewhere = new Set(profile.education.filter((_, n) => n !== i).map((x) => x.level));
+          return (
+            <div className="bmgj-info-row" key={i}>
+              <div className="bmgj-info-row-head">
+                <strong>{e.level || `학력 ${i + 1}`}</strong>
+                <button type="button" className="bmgj-info-remove" disabled={busy} onClick={() => set({ education: profile.education.filter((_, n) => n !== i) })}>
+                  삭제
+                </button>
+              </div>
+              <Select
+                label="학교 구분" value={e.level} options={SCHOOL_LEVELS.filter((l) => !usedElsewhere.has(l))} disabled={busy}
+                onChange={(v) => setEdu(i, { level: v, system: '', degree: '', grade: '', status: '', period: '' })}
+              />
+              <Text label="학교명" value={e.school} disabled={busy} placeholder="예: 한국고등학교" onChange={(v) => setEdu(i, { school: v })} />
+              {spec?.major && (
+                <Text label="전공학과" value={e.major} disabled={busy} placeholder="예: 컴퓨터공학과" onChange={(v) => setEdu(i, { major: v })} />
+              )}
+              {(spec?.system || spec?.degree) && (
+                <div className="bmgj-info-pair">
+                  {spec.degree && <Select label="학위" value={e.degree} options={SCHOOL_DEGREES} disabled={busy} onChange={(v) => setEdu(i, { degree: v })} />}
+                  {spec.system && <Select label="학제" value={e.system} options={SCHOOL_SYSTEMS} disabled={busy} onChange={(v) => setEdu(i, { system: v })} />}
+                </div>
+              )}
+              {spec && !spec.period && (
+                <div className="bmgj-info-pair">
+                  <Select label="학년" value={e.grade} options={spec.grades} disabled={busy} onChange={(v) => setEdu(i, { grade: v })} />
+                  <Select label="졸업구분" value={e.status} options={spec.statuses} disabled={busy} onChange={(v) => setEdu(i, { status: v })} />
+                </div>
+              )}
+              {spec?.period && (
+                <Select label="수료기간" value={e.period} options={TRAINING_PERIODS} disabled={busy} onChange={(v) => setEdu(i, { period: v })} />
+              )}
             </div>
-            <Select label="학교 구분" value={e.level} options={SCHOOL_LEVELS} disabled={busy} onChange={(v) => setEdu(i, { level: v })} />
-            <Text label="학교명" value={e.school} disabled={busy} placeholder="예: 한국고등학교" onChange={(v) => setEdu(i, { school: v })} />
-            {!NO_MAJOR_LEVELS.has(e.level) && (
-              <Text label="학과(전공)" value={e.major} disabled={busy} placeholder="예: 컴퓨터공학과" onChange={(v) => setEdu(i, { major: v })} />
-            )}
-            <div className="bmgj-info-pair">
-              <Select label="학년" value={e.grade} options={SCHOOL_GRADES} disabled={busy} onChange={(v) => setEdu(i, { grade: v })} />
-              <Select label="학적 상태" value={e.status} options={SCHOOL_STATUSES} disabled={busy} onChange={(v) => setEdu(i, { status: v })} />
-            </div>
-            <div className="bmgj-info-pair">
-              <Text label="입학 연월" type="month" value={e.admitted} disabled={busy} onChange={(v) => setEdu(i, { admitted: v })} />
-              <Text label="졸업(예정) 연월" type="month" value={e.graduated} disabled={busy} onChange={(v) => setEdu(i, { graduated: v })} />
-            </div>
-          </div>
-        ))}
+          );
+        })}
         {profile.education.length < MAX_EDUCATION && (
           <button type="button" className="bmgj-profile-secondary bmgj-info-add" disabled={busy} onClick={() => set({ education: [...profile.education, emptyEducation()] })}>
             + 학력 추가
@@ -110,34 +125,31 @@ export function ProfileFormFields({ profile, busy, onChange }: FormProps) {
       </fieldset>
 
       <fieldset className="bmgj-info-group">
-        <legend>자격증</legend>
-        {profile.licenses.length === 0 && <p className="bmgj-info-empty">입력한 자격증이 없어요.</p>}
+        <legend>자격/면허</legend>
+        <p className="bmgj-info-hint">명칭은 통합지원서에서 검색 버튼으로 직접 골라야 해요. 같은 명칭이 있으면 취득시기를 채워 줘요.</p>
+        {profile.licenses.length === 0 && <p className="bmgj-info-empty">입력한 자격/면허가 없어요.</p>}
         {profile.licenses.map((l, i) => (
           <div className="bmgj-info-row" key={i}>
             <div className="bmgj-info-row-head">
-              <strong>{`자격증 ${i + 1}`}</strong>
+              <strong>{`자격/면허 ${i + 1}`}</strong>
               <button type="button" className="bmgj-info-remove" disabled={busy} onClick={() => set({ licenses: profile.licenses.filter((_, n) => n !== i) })}>
                 삭제
               </button>
             </div>
-            <Text label="자격·면허명" value={l.name} disabled={busy} placeholder="예: 정보처리기사" onChange={(v) => setLic(i, { name: v })} />
-            <div className="bmgj-info-pair">
-              <Text label="등급" value={l.grade} disabled={busy} placeholder="예: 기사" onChange={(v) => setLic(i, { grade: v })} />
-              <Text label="취득일" type="date" value={l.acquired} disabled={busy} onChange={(v) => setLic(i, { acquired: v })} />
-            </div>
-            <Text label="자격 번호" value={l.number} disabled={busy} onChange={(v) => setLic(i, { number: v })} />
-            <Text label="발급 기관" value={l.issuer} disabled={busy} placeholder="예: 한국산업인력공단" onChange={(v) => setLic(i, { issuer: v })} />
+            <Text label="명칭" value={l.name} disabled={busy} placeholder="예: 정보처리기사" onChange={(v) => setLic(i, { name: v })} />
+            <Text label="취득시기" type="date" value={l.acquired} disabled={busy} onChange={(v) => setLic(i, { acquired: v })} />
           </div>
         ))}
         {profile.licenses.length < MAX_LICENSES && (
           <button type="button" className="bmgj-profile-secondary bmgj-info-add" disabled={busy} onClick={() => set({ licenses: [...profile.licenses, emptyLicense()] })}>
-            + 자격증 추가
+            + 자격/면허 추가
           </button>
         )}
       </fieldset>
 
       <fieldset className="bmgj-info-group">
         <legend>신체조건사항</legend>
+        <p className="bmgj-info-hint">통합지원서 기본정보 화면에는 이 칸이 없어서 내 정보에만 적어 둬요.</p>
         <div className="bmgj-info-pair">
           <Text label="신장(cm)" value={profile.body.height} inputMode="decimal" maxLength={5} disabled={busy} placeholder="175" onChange={(v) => setBody({ height: v })} />
           <Text label="체중(kg)" value={profile.body.weight} inputMode="decimal" maxLength={5} disabled={busy} placeholder="70" onChange={(v) => setBody({ weight: v })} />
@@ -175,19 +187,19 @@ export function ProfileValues({ profile }: { profile: Profile }) {
         <dd>
           {profile.education.length ? profile.education.map((e, i) => (
             <span className="bmgj-info-line" key={i}>
-              {join(e.level, e.school, e.major, e.grade && `${e.grade}학년`, e.status)}
-              {(e.admitted || e.graduated) && <small>{`${e.admitted || '?'} ~ ${e.graduated || '?'}`}</small>}
+              {join(e.level, e.school, e.major)}
+              {(e.degree || e.system || e.grade || e.status || e.period) && <small>{join(e.degree, e.system, e.grade, e.status, e.period && `수료기간 ${e.period}`)}</small>}
             </span>
           )) : '미입력'}
         </dd>
       </div>
       <div className="bmgj-profile-value">
-        <dt>자격증</dt>
+        <dt>자격/면허</dt>
         <dd>
           {profile.licenses.length ? profile.licenses.map((l, i) => (
             <span className="bmgj-info-line" key={i}>
-              {join(l.name, l.grade)}
-              {(l.acquired || l.issuer || l.number) && <small>{join(l.acquired && `취득 ${l.acquired}`, l.issuer, l.number && `번호 ${l.number}`)}</small>}
+              {l.name.trim() || '명칭 미입력'}
+              {l.acquired && <small>{`취득 ${l.acquired}`}</small>}
             </span>
           )) : '미입력'}
         </dd>

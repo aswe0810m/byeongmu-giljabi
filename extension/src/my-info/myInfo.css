@@ -59,6 +59,33 @@
   background: #286c50;
   color: #fff;
 }
+.bmgj-pick-search {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 8px;
+  padding: 9px 12px;
+  border: 1px solid #b9d6c3;
+  border-radius: 12px;
+  background: #fff;
+  color: #203d33;
+  font: inherit;
+  font-size: 15px;
+}
+.bmgj-pick-search:focus {
+  outline: 2px solid #286c50;
+  outline-offset: 1px;
+}
+.bmgj-pick-scroll {
+  max-height: 264px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.bmgj-pick-empty {
+  margin: 6px 0 0;
+  color: #5b7368;
+  font-size: 14px;
+}
 .bmgj-pick-summary {
   margin: 4px 0 0;
   padding: 11px 13px;
@@ -196,6 +223,13 @@
   margin: 0;
   font-size: 13px;
   color: #6b8273;
+}
+.bmgj-info-hint {
+  margin: 0 0 2px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #4f6a5c;
+  word-break: keep-all;
 }
 select.bmgj-profile-input {
   appearance: auto;

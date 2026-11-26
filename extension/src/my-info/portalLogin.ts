@@ -41,6 +41,20 @@ function parseCounter(text: string | null): number | null {
   return m ? (Number(m[1]) * 60 + Number(m[2])) * 1000 : null;
 }
 
+/**
+ * 로그아웃 상태의 원본 위쪽 링크(#util_layout2)는 '로그인'이 아니라 '접속하기'로 보인다(2026-11-26 확인).
+ * readSession().canLogin은 '로그인' 글자만 찾으므로 여기서 '접속하기'도 함께 본다.
+ */
+function loginLinkShown(frame: HTMLIFrameElement): boolean {
+  try {
+    const util = frame.contentDocument?.getElementById('util_layout2');
+    if (!util) return false;
+    return [...util.querySelectorAll('a')].some((a) => /^(로그인|접속하기)$/.test((a.textContent ?? '').replace(/\s+/g, '')));
+  } catch {
+    return false;
+  }
+}
+
 /** 병무민원 바깥 틀에서 한 번 호출. 로그인 상태가 바뀌거나 연장되면 저장한다. */
 export function startPortalLoginWatch(frame: HTMLIFrameElement): void {
   let last: PortalLogin | null = null;
@@ -59,7 +73,7 @@ export function startPortalLoginWatch(frame: HTMLIFrameElement): void {
       if (!last?.loggedIn || Math.abs(last.expiresAt - expiresAt) > SAME_EXPIRY_MS) {
         write({ loggedIn: true, expiresAt, checkedAt: now });
       }
-    } else if (session.canLogin && last?.loggedIn !== false) {
+    } else if ((session.canLogin || (!session.canLogout && loginLinkShown(frame))) && last?.loggedIn !== false) {
       // 로그인 버튼이 보일 때만 로그아웃으로 본다(화면을 옮기는 중이라 버튼을 못 읽는 순간은 건너뜀).
       write({ loggedIn: false, expiresAt: 0, checkedAt: now });
     }
