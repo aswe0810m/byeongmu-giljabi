@@ -17,6 +17,7 @@ import type { PanelCatalog } from '../ui/MenuPanel';
 import { MenuPanel } from '../ui/MenuPanel';
 import { MyInfoWidget } from '../ui/MyInfoButton';
 import { PortalSessionControls } from './PortalSessionControls';
+import { PortalPageShell } from './page/PortalPageShell';
 import { hideFrame, isPortalMain, restoreFrame } from './portalDom';
 
 const EG_LOGO = 'https://mwpt.mma.go.kr/caisBMHS/images/inc/eg_logo.png';
@@ -183,8 +184,13 @@ export function PortalApp({ frame, initialPrefs, menu }: PortalAppProps) {
     </div>
   );
 
-  // 첫 화면이 아닌 포털 화면에서는 아무것도 그리지 않는다.
-  if (!onMain) return null;
+  // 첫 화면이 아니면 세부 화면 공통 틀(등록된 카드 화면만 그림, 나머지는 원본 그대로).
+  if (!onMain) {
+    return (
+      <PortalPageShell frame={frame} menu={menu} group={group} viewMode={viewMode} onGroupChange={changeGroup}
+        onShowOriginal={showOriginal} onTurnOn={turnOn} toast={toastRegion} />
+    );
+  }
 
   if (viewMode === 'original') {
     return (

@@ -1,0 +1,556 @@
+/* 병무민원 세부 화면 공통 틀 — 프레임(원본 화면) 안 스타일.
+   프레임 문서의 <html>에 .bmgj-page-frame 이 붙어 있을 때만 적용된다(원래 화면으로 돌리면 클래스와 이 스타일을 지움).
+   기능은 그대로 두고 원본 요소의 모양만 바꾼다: 원본 머리(띠·로고·대메뉴)·위치·왼쪽 메뉴·제목·푸터는 숨기고
+   (바깥 틀에 병무길잡이 헤더와 화면 머리를 그림), 본문은 흰 패널 안에 병무민원 개선 화면 색으로 다시 그린다.
+   색 값은 styles.css 의 :host(.bmgj-theme-portal) 과 같다. 글 배치 표시(data-bmgj-page)는 layout.ts 가 단다. */
+
+html.bmgj-page-frame {
+  --bg-page: #F4F6FB;
+  --bg-surface: #FFFFFF;
+  --bg-card: #FAFBFE;
+  --border: #E2E7F1;
+  --text: #1B2440;
+  --text-sub: #555F77;
+  --text-link: #3245A0;
+  --brand-solid: #3448A8;
+  --focus: #4C63D2;
+  --highlight-bg: #EEF1FC;
+  --highlight-border: #BAC5EE;
+  --select-bg: #E9EDFA;
+  --hero-btn: #DCE3FF;
+  --bullet: #5262A3;
+  --note-bg: #FFF9ED;
+  --note-border: #EEDDB5;
+  --note-accent: #C4861A;
+  width: auto !important;
+  min-width: 0 !important;
+  background: var(--bg-page) !important;
+}
+html.bmgj-page-frame body {
+  width: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  background: var(--bg-page) !important;
+  font-family: "Pretendard GOV", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif !important;
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+  color: var(--text) !important;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+html.bmgj-page-frame body * { font-family: inherit !important; }
+
+/* ── 원본 틀 숨김. 로그인 남은 시간(#counter)·연장·나가기는 바깥 헤더가 읽어 쓰므로 DOM 에 남겨 두고,
+   자동 로그아웃 예고창(#popup)은 그대로 보이게 둔다. ── */
+html.bmgj-page-frame #util_layout2 {
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: none !important;
+}
+html.bmgj-page-frame #util_layout2 > .util,
+html.bmgj-page-frame #top_layout,
+html.bmgj-page-frame #location_layout,
+html.bmgj-page-frame #sub_layout > .left,
+html.bmgj-page-frame #sub > .title,
+html.bmgj-page-frame #foot_layout { display: none !important; }
+
+/* ── 본문 패널(바깥 틀의 헤더·배너와 같은 폭) ── */
+html.bmgj-page-frame #sub_layout {
+  box-sizing: border-box;
+  display: block !important;
+  float: none !important;
+  width: auto !important;
+  max-width: 1248px;
+  margin: 0 auto !important;
+  padding: 0 32px 64px !important;
+  background: none !important;
+}
+html.bmgj-page-frame #sub_layout::after { content: ""; display: block; clear: both; }
+html.bmgj-page-frame #sub {
+  box-sizing: border-box;
+  float: none !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 36px 40px 40px !important;
+  border-radius: 24px;
+  background: var(--bg-surface) !important;
+}
+/* 원본 #contents 는 inline-block 이라 내용 폭만큼 줄어든다 → block */
+html.bmgj-page-frame #contents,
+html.bmgj-page-frame #contents .contents_box {
+  display: block !important;
+  width: auto !important;
+  float: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+  color: var(--text);
+}
+
+/* ── 소제목: 원본의 파란 원 그림 대신 왼쪽 막대 ── */
+html.bmgj-page-frame #contents .layout_h3,
+html.bmgj-page-frame #contents .layout_h4 {
+  width: auto !important;
+  margin: 32px 0 0 !important;
+  padding: 0 !important;
+  background: none !important;
+}
+html.bmgj-page-frame #contents .contents_box > form > .layout_h3:first-of-type,
+html.bmgj-page-frame #contents .contents_box > .layout_h3:first-child { margin-top: 0 !important; }
+html.bmgj-page-frame #contents h3,
+html.bmgj-page-frame #contents h4 {
+  position: relative;
+  margin: 0 0 12px !important;
+  padding: 0 0 0 14px !important;
+  background: none !important;
+  font-size: 19px !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
+  color: var(--text) !important;
+}
+html.bmgj-page-frame #contents h4 { font-size: 17px !important; }
+html.bmgj-page-frame #contents h3::before,
+html.bmgj-page-frame #contents h4::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.3em;
+  width: 4px;
+  height: 0.95em;
+  border-radius: 2px;
+  background: var(--brand-solid);
+}
+/* 목록·표 다음에 오는 소제목은 위를 띄운다 */
+html.bmgj-page-frame #contents :is(ul, ol, table, p, div) + :is(h3, h4) { margin-top: 32px !important; }
+
+/* ── 안내 목록: 원본 그림 글머리표 대신 점·짧은 줄 ── */
+html.bmgj-page-frame #contents ul,
+html.bmgj-page-frame #contents ol { margin: 0 !important; padding: 0 !important; list-style: none !important; }
+html.bmgj-page-frame #contents ul.list { margin: 0 0 8px !important; }
+html.bmgj-page-frame #contents ul.list > li,
+html.bmgj-page-frame #contents ul.list li ul > li {
+  position: relative;
+  margin: 8px 0 0 !important;
+  padding: 0 0 0 16px !important;
+  background: none !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  color: var(--text);
+}
+html.bmgj-page-frame #contents ul.list li ul > li { margin-top: 6px !important; font-size: 14px !important; color: var(--text-sub); }
+html.bmgj-page-frame #contents ul.list > li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.68em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--bullet);
+}
+html.bmgj-page-frame #contents ul.list li ul { margin: 2px 0 6px !important; }
+html.bmgj-page-frame #contents ul.list li ul > li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.8em;
+  width: 7px;
+  height: 1.5px;
+  background: var(--highlight-border);
+}
+html.bmgj-page-frame #contents li > strong,
+html.bmgj-page-frame #contents li > strong > span { color: inherit; }
+html.bmgj-page-frame #contents ul.list > li > strong { color: var(--text); }
+html.bmgj-page-frame #contents strong { font-weight: 700 !important; }
+html.bmgj-page-frame #contents em { font-style: normal; }
+/* 한 줄 글은 너무 길지 않게(약 55자) */
+html.bmgj-page-frame #contents ul.list > li:not([data-bmgj-page="group"]),
+html.bmgj-page-frame #contents [data-bmgj-page="group"] > ul > li { max-width: 880px; }
+
+/* 그림(흐름도 등) */
+html.bmgj-page-frame #contents img { max-width: 100%; height: auto; }
+html.bmgj-page-frame #contents .layout_h3 > ul.list > img,
+html.bmgj-page-frame #contents .layout_h3 > img {
+  display: block;
+  margin: 16px 0 !important;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+/* ── 표 ── */
+html.bmgj-page-frame #contents table {
+  width: 100% !important;
+  margin: 12px 0 !important;
+  border: 1px solid var(--border) !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--bg-surface) !important;
+  font-size: 15px !important;
+}
+html.bmgj-page-frame #contents table caption {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+html.bmgj-page-frame #contents th,
+html.bmgj-page-frame #contents td {
+  height: auto !important;
+  padding: 14px 18px !important;
+  border: 0 !important;
+  border-top: 1px solid var(--border) !important;
+  background-image: none !important;
+  line-height: 1.55 !important;
+  color: var(--text) !important;
+  text-align: left;
+  vertical-align: middle;
+}
+html.bmgj-page-frame #contents tr:first-child > th,
+html.bmgj-page-frame #contents tr:first-child > td { border-top: 0 !important; }
+html.bmgj-page-frame #contents thead + tbody tr:first-child > * { border-top: 1px solid var(--border) !important; }
+html.bmgj-page-frame #contents th {
+  background-color: var(--bg-card) !important;
+  font-weight: 600 !important;
+  color: var(--text-sub) !important;
+}
+html.bmgj-page-frame #contents thead th { text-align: center; }
+html.bmgj-page-frame #contents table td[align="center"],
+html.bmgj-page-frame #contents table th[align="center"],
+html.bmgj-page-frame #contents tbody.text_center td { text-align: center; }
+
+/* ── 원본의 회색 상자(.board_box, .board_box1 등) → 옅은 둥근 상자 ── */
+html.bmgj-page-frame #contents [class^="board_box"],
+html.bmgj-page-frame #contents [class*=" board_box"] {
+  width: auto !important;
+  margin: 16px 0 !important;
+  padding: 18px 20px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px;
+  background: var(--bg-card) !important;
+}
+/* 표 하나만 든 상자는 상자 없이 표만 */
+html.bmgj-page-frame #contents [class*="board_box"]:has(> table:only-child) {
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+}
+html.bmgj-page-frame #contents [class*="board_box"] > table:only-child { margin: 0 !important; }
+html.bmgj-page-frame #contents .padding_div,
+html.bmgj-page-frame #contents .h4_wrap { width: auto !important; padding: 0 !important; background: none !important; }
+html.bmgj-page-frame #contents .h4_wrap { margin-top: 20px !important; }
+/* 상자 안의 일반 목록, 목록 없이 바로 놓인 li·p 도 같은 글머리표·글자 크기로 */
+html.bmgj-page-frame #contents [class*="board_box"] ul:not(.list) > li,
+html.bmgj-page-frame #contents [class*="board_box"] > li {
+  position: relative;
+  list-style: none;
+  margin: 8px 0 0 !important;
+  padding: 0 0 0 16px !important;
+  background: none !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  color: var(--text);
+}
+html.bmgj-page-frame #contents [class*="board_box"] ul:not(.list) > li::before,
+html.bmgj-page-frame #contents [class*="board_box"] > li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.72em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--bullet);
+}
+html.bmgj-page-frame #contents [class*="board_box"] > li:first-child { margin-top: 0 !important; }
+html.bmgj-page-frame #contents [class*="board_box"] > p { margin: 2px 0 0 !important; padding-left: 28px !important; font-size: 14px !important; color: var(--text-sub); }
+html.bmgj-page-frame #contents [class*="board_box"] > br { display: none; }
+
+/* ── 입력칸 ── */
+html.bmgj-page-frame #contents select,
+html.bmgj-page-frame #contents input[type="text"],
+html.bmgj-page-frame #contents input[type="tel"],
+html.bmgj-page-frame #contents input[type="email"],
+html.bmgj-page-frame #contents input[type="number"],
+html.bmgj-page-frame #contents input[type="password"],
+html.bmgj-page-frame #contents input:not([type]) {
+  height: 44px !important;
+  max-width: 100%;
+  padding: 0 14px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  background-color: var(--bg-surface) !important;
+  font-size: 15px !important;
+  color: var(--text) !important;
+  vertical-align: middle;
+}
+html.bmgj-page-frame #contents select { padding-right: 36px !important; min-width: 200px; }
+html.bmgj-page-frame #contents textarea {
+  max-width: 100%;
+  padding: 12px 14px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  font-size: 15px !important;
+  color: var(--text) !important;
+}
+html.bmgj-page-frame #contents input[readonly],
+html.bmgj-page-frame #contents input[disabled],
+html.bmgj-page-frame #contents select[disabled] { background-color: var(--bg-page) !important; color: var(--text-sub) !important; }
+html.bmgj-page-frame #contents input[type="radio"],
+html.bmgj-page-frame #contents input[type="checkbox"] { width: 18px; height: 18px; margin: 0 6px 0 0; vertical-align: -3px; accent-color: var(--brand-solid); }
+html.bmgj-page-frame #contents :is(input, select, textarea, a, button):focus-visible {
+  outline: 2px solid var(--focus) !important;
+  outline-offset: 2px;
+}
+/* 동의 체크칸은 눈에 띄게 */
+html.bmgj-page-frame #contents :is(strong, label, span, p):has(> input[type="checkbox"]) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 8px 14px;
+  border: 1px solid var(--highlight-border);
+  border-radius: 10px;
+  background: var(--highlight-bg);
+  font-weight: 700;
+  color: var(--text-link) !important;
+}
+
+/* ── 버튼: 원본 span.button(그림 테두리) → 둥근 버튼. 파랑 = 주 버튼, 그 밖 = 테두리 버튼 ── */
+html.bmgj-page-frame #contents span.button {
+  display: inline-flex !important;
+  float: none !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 4px 2px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  vertical-align: middle;
+}
+html.bmgj-page-frame #contents span.button > a,
+html.bmgj-page-frame #contents span.button > input,
+html.bmgj-page-frame #contents span.button > button,
+html.bmgj-page-frame #contents input[type="button"],
+html.bmgj-page-frame #contents input[type="submit"],
+html.bmgj-page-frame #contents button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  float: none !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 44px;
+  margin: 0 !important;
+  padding: 0 22px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  background: var(--bg-surface) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  color: var(--text-link) !important;
+  text-decoration: none !important;
+  cursor: pointer;
+}
+html.bmgj-page-frame #contents span.button > a:hover,
+html.bmgj-page-frame #contents span.button > input:hover,
+html.bmgj-page-frame #contents input[type="button"]:hover,
+html.bmgj-page-frame #contents button:hover { border-color: var(--highlight-border) !important; background: var(--highlight-bg) !important; }
+html.bmgj-page-frame #contents span.button.blue > a,
+html.bmgj-page-frame #contents span.button.blue > input,
+html.bmgj-page-frame #contents span.button.blue > button {
+  min-width: 120px;
+  border-color: var(--brand-solid) !important;
+  background: var(--brand-solid) !important;
+  color: #FFFFFF !important;
+}
+html.bmgj-page-frame #contents span.button.blue > a:hover,
+html.bmgj-page-frame #contents span.button.blue > input:hover { background: #2B3C8F !important; border-color: #2B3C8F !important; }
+html.bmgj-page-frame #contents span.button.small > a,
+html.bmgj-page-frame #contents span.button.small > input,
+html.bmgj-page-frame #contents span.button.link > a {
+  min-width: 0;
+  min-height: 32px;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+}
+html.bmgj-page-frame #contents span.button.link > a {
+  border-color: var(--highlight-border) !important;
+  background: var(--highlight-bg) !important;
+  color: var(--text-link) !important;
+}
+
+/* 가운데 정렬 문단(제출 확인 문구 + 버튼) */
+html.bmgj-page-frame #contents p.text_center,
+html.bmgj-page-frame #contents .btn_area,
+html.bmgj-page-frame #contents .btnArea,
+html.bmgj-page-frame #contents .btn_center {
+  margin: 20px 0 0 !important;
+  text-align: center !important;
+  font-size: 15px !important;
+  color: var(--text) !important;
+}
+
+/* 원본 레이어 창(#modalDiv): 둥근 상자로만 */
+html.bmgj-page-frame #modalDiv { border: 0 !important; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 32px rgba(27, 36, 64, 0.18); }
+
+/* ════ 글 배치(layout.ts 가 단 표시) ════ */
+
+/* 원본의 빨강·파랑 강조는 개선 화면 색으로(대비 4.5:1 이상) */
+html.bmgj-page-frame #contents [data-bmgj-page-tone="red"],
+html.bmgj-page-frame #contents [data-bmgj-page-tone="red"] * { color: #B8352A !important; }
+html.bmgj-page-frame #contents [data-bmgj-page-tone="blue"],
+html.bmgj-page-frame #contents [data-bmgj-page-tone="blue"] * { color: var(--text-link) !important; }
+
+/* "항목명 : 값" → [항목명] 값 */
+html.bmgj-page-frame #contents li[data-bmgj-page="fact"] { padding-left: 0 !important; }
+html.bmgj-page-frame #contents li[data-bmgj-page="fact"]::before { display: none !important; }
+html.bmgj-page-frame #contents [data-bmgj-page="label"] {
+  display: inline-block;
+  margin: 0 10px 2px 0;
+  padding: 1px 10px;
+  border-radius: 6px;
+  background: var(--select-bg);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.8;
+  color: var(--text-link) !important;
+  vertical-align: 1px;
+}
+/* 쌍점·쉼표는 화면에서만 감추고 화면 읽기 프로그램에는 남긴다 */
+html.bmgj-page-frame #contents [data-bmgj-page="colon"] {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* 짧은 제목 + 하위 목록 → 묶음 상자(위아래로만 쌓음) */
+html.bmgj-page-frame #contents li[data-bmgj-page="group"] {
+  margin: 14px 0 0 !important;
+  padding: 18px 22px 20px !important;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-card) !important;
+  font-size: 16px !important;
+  font-weight: 700;
+  color: var(--text);
+}
+html.bmgj-page-frame #contents li[data-bmgj-page="group"]::before { display: none !important; }
+html.bmgj-page-frame #contents li[data-bmgj-page="group"] > ul,
+html.bmgj-page-frame #contents li[data-bmgj-page="group"] > ol {
+  margin: 12px 0 0 !important;
+  padding: 10px 0 0 !important;
+  border-top: 1px solid var(--border);
+  font-weight: 400;
+}
+html.bmgj-page-frame #contents li[data-bmgj-page="group"] > ul > li { font-size: 15px !important; font-weight: 400; color: var(--text); }
+html.bmgj-page-frame #contents li[data-bmgj-page="group"] > ul > li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.72em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--bullet);
+}
+
+/* 연락처 → 표처럼 [기관 | 번호 | 기관 | 번호] */
+html.bmgj-page-frame #contents ul[data-bmgj-page="contacts"] {
+  display: grid !important;
+  grid-template-columns: max-content minmax(0, 1fr) max-content minmax(0, 1fr);
+  gap: 8px 14px;
+  margin: 12px 0 0 !important;
+  padding: 14px 18px !important;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+html.bmgj-page-frame #contents ul[data-bmgj-page="contacts"] > li { display: contents !important; }
+html.bmgj-page-frame #contents ul[data-bmgj-page="contacts"] > li::before { display: none !important; }
+html.bmgj-page-frame #contents ul[data-bmgj-page="contacts"] strong { font-weight: 600 !important; color: var(--text-sub) !important; }
+
+/* 유의사항·기타사항 구역 → 노란 안내 상자 */
+html.bmgj-page-frame #contents [data-bmgj-page="note"] {
+  margin-top: 32px !important;
+  padding: 24px 28px 26px !important;
+  border: 1px solid var(--note-border) !important;
+  border-radius: 18px;
+  background: var(--note-bg) !important;
+}
+html.bmgj-page-frame #contents [data-bmgj-page="note"] h3::before,
+html.bmgj-page-frame #contents [data-bmgj-page="note"] h4::before { background: var(--note-accent); }
+html.bmgj-page-frame #contents [data-bmgj-page="note"] ul.list > li::before,
+html.bmgj-page-frame #contents [data-bmgj-page="note"] li[data-bmgj-page="group"] > ul > li::before { background: var(--note-accent); }
+html.bmgj-page-frame #contents [data-bmgj-page="note"] li[data-bmgj-page="group"] { background: var(--bg-surface) !important; border-color: var(--note-border); }
+html.bmgj-page-frame #contents [data-bmgj-page="note"] li[data-bmgj-page="group"] > ul { border-top-color: #F3E7CB; }
+
+/* 바로가기·내려받기 링크 → 꼬리표 */
+html.bmgj-page-frame #contents a[data-bmgj-page="chip"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 2px 2px;
+  padding: 1px 12px;
+  border: 1px solid var(--highlight-border);
+  border-radius: 999px;
+  background: var(--highlight-bg);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.8;
+  color: var(--text-link) !important;
+  text-decoration: none !important;
+}
+html.bmgj-page-frame #contents a[data-bmgj-page="chip"]::after { content: "\203A"; margin-left: 4px; font-weight: 700; }
+html.bmgj-page-frame #contents a[data-bmgj-page="chip"]:hover { border-color: var(--text-link); }
+
+/* 입력하는 표 */
+html.bmgj-page-frame #contents table[data-bmgj-page="form"] { border-color: var(--highlight-border) !important; }
+html.bmgj-page-frame #contents table[data-bmgj-page="form"] th { background-color: var(--highlight-bg) !important; color: var(--text-link) !important; }
+
+/* 단계 목록: [첫째] [둘째] … 꼬리표 */
+html.bmgj-page-frame #contents ul[data-bmgj-page="steps"] > li[data-bmgj-page="step"] { padding-left: 0 !important; margin-top: 10px !important; }
+html.bmgj-page-frame #contents ul[data-bmgj-page="steps"] > li[data-bmgj-page="step"]::before { display: none !important; }
+html.bmgj-page-frame #contents [data-bmgj-page="step-no"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  margin-right: 10px;
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: var(--brand-solid);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.8;
+  color: #FFFFFF !important;
+  vertical-align: 1px;
+}
+
+/* 버튼만 있는 항목은 글머리표 없이 */
+html.bmgj-page-frame #contents li[data-bmgj-page="button-only"] { padding-left: 0 !important; margin-top: 12px !important; }
+html.bmgj-page-frame #contents li[data-bmgj-page="button-only"]::before { display: none !important; }
+
+/* 제출 확인 문구 + 버튼: 바탕색 없이 가운데에, 문구는 굵게(사용자 결정 2026-11-23: 버튼 주변 바탕색 없음) */
+html.bmgj-page-frame #contents p[data-bmgj-page][data-bmgj-page^="action"] {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  text-align: center !important;
+}
+html.bmgj-page-frame #contents p[data-bmgj-page][data-bmgj-page="action-q"] {
+  margin-top: 36px !important;
+  padding-top: 28px !important;
+  border-top: 1px solid var(--border) !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+}
+html.bmgj-page-frame #contents p[data-bmgj-page][data-bmgj-page="action-btn"] { margin-top: 14px !important; }
+html.bmgj-page-frame #contents p[data-bmgj-page][data-bmgj-page="action"] { margin-top: 28px !important; }
+html.bmgj-page-frame #contents p[data-bmgj-page^="action"] span.button.blue > a { min-width: 180px; min-height: 52px; font-size: 16px !important; }

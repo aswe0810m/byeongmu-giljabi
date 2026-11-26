@@ -9,6 +9,7 @@ import { readNews } from '../news/readNews';
 import { loadPrefs } from '../storage/prefs';
 import { App } from '../ui/App';
 import { PortalApp } from '../portal/PortalApp';
+import { registerPALeft } from '../portal/p-a-left/register';
 import { openProfileGuideAfterLogin, startProfileSync } from '../profile/profileSync';
 import { findPortalFrame, readPortalMenu, restoreFrame } from '../portal/portalDom';
 import { MyInfoWidget } from '../ui/MyInfoButton';
@@ -87,6 +88,7 @@ function ensurePortalFont(): void {
  * 프레임에 첫 화면이 열려 있을 때만 프레임을 숨긴다(PortalApp).
  */
 async function startPortal(): Promise<void> {
+  registerPALeft(); // 병무민원 세부 화면: 입영 준비 카드 6개(p-a-left)
   const frame = findPortalFrame();
   if (!frame) return; // 팝업 등 틀이 없는 포털 화면
   openProfileGuideAfterLogin(frame);
