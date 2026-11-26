@@ -207,7 +207,8 @@ export function SubpageApp({ page, dom, hosts, mounts, initialPrefs, allMenu, no
         mounts.notice,
       )}
 
-      {createPortal(<Footer />, mounts.footer)}
+      {/* 푸터는 헤더·본문과 같은 폭(.bmgj-container)에 둔다(디자인 통일 2026-11-26) */}
+      {createPortal(<div className="bmgj-container"><Footer /></div>, mounts.footer)}
 
       {/* 화면 전환·설정 초기화를 누르면 내 정보 창을 닫는 동작은 메인과 같게 둔다. */}
       <MyInfoWidget isMainPage />

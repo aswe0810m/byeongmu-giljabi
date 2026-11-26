@@ -50,7 +50,7 @@ html.bmgj-sub #secrion #colgroup {
   display: block !important;
   width: auto !important;
   min-width: 0;
-  padding: 32px !important;
+  padding: 36px 40px 40px !important; /* 병무민원 세부 화면 패널과 같은 값 */
   border-radius: 24px;
   background: var(--bmgj-surface);
   box-sizing: border-box;
@@ -63,12 +63,13 @@ html.bmgj-sub #secrion #contents {
   min-height: 0 !important;
 }
 /* 고정된 내 정보 버튼이 푸터를 가리지 않게(메인 .bmgj-page와 같은 96px) */
-html.bmgj-sub #bmgj-sub-footer { padding: 0 32px 96px; }
+html.bmgj-sub #bmgj-sub-footer { padding: 0 0 96px; }
 
-/* ── 본문 글자 ── */
+/* ── 본문 글자 ──
+   디자인 통일(2026-11-26): 글자·제목·목록·표·상자 값은 병무민원 세부 화면(src/portal/page/frame.css)과 같게 맞춘다. */
 html.bmgj-sub #contents {
-  font-size: 16px;
-  line-height: 1.75;
+  font-size: 15px;
+  line-height: 1.7;
   color: var(--bmgj-text);
   word-break: keep-all;
   overflow-wrap: anywhere;
@@ -77,124 +78,139 @@ html.bmgj-sub #contents {
 html.bmgj-sub #contents,
 html.bmgj-sub #contents p,
 html.bmgj-sub #contents li { text-align: left; }
-html.bmgj-sub #contents p { margin: 0 0 12px; }
+html.bmgj-sub #contents p { margin: 0 0 12px; font-size: 15px; line-height: 1.7; }
 html.bmgj-sub #contents a { color: var(--bmgj-link); text-underline-offset: 3px; }
 html.bmgj-sub #contents a:focus-visible { outline: 2px solid var(--bmgj-focus); outline-offset: 2px; }
 html.bmgj-sub #contents img { max-width: 100%; height: auto; }
-/* 클릭 영역이 있는 이미지 지도(usemap)는 좌표가 원래 크기 기준이라 늘리지 않는다(A-M10 페이지) */
-html.bmgj-sub #contents img[usemap] { width: auto !important; }
+/* 이미지 지도(usemap)는 start.tsx가 원래 화면의 너비로 고정한다(클릭 영역 좌표가 그 크기 기준) */
 
-/* 제목: 원본의 아이콘 배경·음수 여백을 걷어내고 왼쪽 막대로 */
-html.bmgj-sub #contents h3 {
+/* 제목(h3 19px, h4 17px): 원본의 아이콘 배경·음수 여백을 걷어내고 왼쪽 막대로 */
+html.bmgj-sub #contents h3,
+html.bmgj-sub #contents h4 {
   position: relative;
   display: block !important;
   width: auto !important;
-  margin: 40px 0 14px !important;
+  margin: 32px 0 12px !important;
   padding: 0 0 0 14px !important;
   background: none !important;
-  font-size: 22px !important;
-  font-weight: 700;
-  line-height: 1.4;
+  font-size: 19px !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
   color: var(--bmgj-text) !important;
 }
-html.bmgj-sub #contents h3::before {
+html.bmgj-sub #contents h4 { font-size: 17px !important; margin-top: 24px !important; }
+html.bmgj-sub #contents h3::before,
+html.bmgj-sub #contents h4::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 0.2em;
-  bottom: 0.2em;
+  top: 0.3em;
   width: 4px;
+  height: 0.95em;
   border-radius: 2px;
   background: var(--bmgj-brand);
-}
-html.bmgj-sub #contents h4 {
-  display: block !important;
-  width: auto !important;
-  margin: 28px 0 10px !important;
-  padding: 0 !important;
-  background: none !important;
-  font-size: 18px !important;
-  font-weight: 700;
-  line-height: 1.45;
-  color: var(--bmgj-text) !important;
 }
 html.bmgj-sub #contents .layout_h3 { margin: 0 0 8px !important; }
 html.bmgj-sub #contents .layout_h4 { margin: 0 0 8px !important; }
 html.bmgj-sub #contents > .layout_h3:first-child > h3:first-child,
 html.bmgj-sub #contents > h3:first-child { margin-top: 0 !important; }
 
-/* 목록: 원본 gif 글머리 대신 점·짧은 선 */
+/* 목록(15px, 아래 단계 14px): 원본 gif 글머리 대신 점·짧은 선 */
 html.bmgj-sub #contents ul.list,
 html.bmgj-sub #contents ul.list_x {
-  margin: 0 0 16px !important;
+  margin: 0 0 8px !important;
   padding: 0 !important;
   text-align: left !important;
 }
 html.bmgj-sub #contents ul.list li,
 html.bmgj-sub #contents ul.list_x li {
   position: relative;
-  margin: 0 0 8px !important;
-  padding: 0 0 0 18px !important;
+  margin: 8px 0 0 !important;
+  padding: 0 0 0 16px !important;
   background: none !important;
-  line-height: 1.75 !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  color: var(--bmgj-text);
 }
 html.bmgj-sub #contents ul.list li::before,
 html.bmgj-sub #contents ul.list_x li::before {
   content: "";
   position: absolute;
-  left: 4px;
-  top: 0.72em;
-  width: 6px;
-  height: 6px;
+  left: 2px;
+  top: 0.68em;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--bmgj-bullet);
 }
 html.bmgj-sub #contents ul.list ul,
-html.bmgj-sub #contents ul.list_x ul { margin: 8px 0 0 !important; padding: 0 !important; }
+html.bmgj-sub #contents ul.list_x ul { margin: 2px 0 6px !important; padding: 0 !important; }
+html.bmgj-sub #contents ul.list ul li,
+html.bmgj-sub #contents ul.list_x ul li { margin-top: 6px !important; font-size: 14px !important; color: var(--bmgj-text-sub); }
 html.bmgj-sub #contents ul.list ul li::before,
 html.bmgj-sub #contents ul.list_x ul li::before {
-  top: 0.82em;
+  top: 0.8em;
   width: 7px;
-  height: 2px;
-  border-radius: 1px;
-  background: var(--bmgj-text-sub);
+  height: 1.5px;
+  border-radius: 0;
+  background: var(--bmgj-highlight-border);
 }
 html.bmgj-sub #contents ul.list li.nobg::before,
 html.bmgj-sub #contents ul.list_x li.nobg::before { display: none; }
 
-/* ── 표 ── */
+/* ── 표: 둥근 바깥 테두리, 머리 칸은 옅은 바탕·회색 굵은 글자(병무민원과 같음).
+   병무청 표는 칸 합치기(rowspan)가 많아 칸 사이 세로선은 남긴다. ── */
 html.bmgj-sub #contents .table_scroll {
   overflow-x: auto !important;
-  margin: 0 0 20px !important;
+  margin: 12px 0 !important;
   padding: 0 !important;
-  border-radius: 12px;
+  border: 1px solid var(--bmgj-border);
+  border-radius: 14px;
 }
 html.bmgj-sub #contents .table_scroll::-webkit-scrollbar { height: 8px; background: var(--bmgj-strip); }
 html.bmgj-sub #contents .table_scroll::-webkit-scrollbar-track { height: 8px; background: var(--bmgj-strip); }
 html.bmgj-sub #contents .table_scroll::-webkit-scrollbar-thumb { height: 8px; border-radius: 4px; background: var(--bmgj-highlight-border); }
 html.bmgj-sub #contents table {
   max-width: 100%;
-  margin: 0 0 20px;
+  margin: 12px 0;
   border-collapse: collapse;
-  border-top: 2px solid var(--bmgj-brand) !important;
+  border: 1px solid var(--bmgj-border) !important;
+  background: var(--bmgj-surface);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.55;
 }
-html.bmgj-sub #contents .table_scroll > table { max-width: none; margin: 0 !important; }
+/* 둥근 상자 안의 표는 바깥 테두리를 숨기고(상자가 그림) 칸 사이 선만 남긴다 */
+html.bmgj-sub #contents .table_scroll > table { max-width: none; margin: 0 !important; border: hidden !important; }
+html.bmgj-sub #contents caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 html.bmgj-sub #contents th,
 html.bmgj-sub #contents td {
-  padding: 10px 12px !important;
+  height: auto !important;
+  padding: 12px 16px !important;
   border: 1px solid var(--bmgj-border) !important;
+  background-image: none !important;
+  line-height: 1.55 !important;
   vertical-align: middle;
   color: var(--bmgj-text);
 }
-html.bmgj-sub #contents thead th,
+html.bmgj-sub #contents th,
 html.bmgj-sub #contents thead td {
-  background: var(--bmgj-highlight-bg) !important;
-  font-weight: 700 !important;
-  color: var(--bmgj-text) !important;
+  background-color: var(--bmgj-card) !important;
+  font-weight: 600 !important;
+  color: var(--bmgj-text-sub) !important;
 }
-html.bmgj-sub #contents tbody th { background: var(--bmgj-card) !important; font-weight: 600; }
+html.bmgj-sub #contents thead th { text-align: center; }
+
+/* ── 원본 회색 상자(.board_box 등) → 옅은 둥근 상자(병무민원과 같음) ── */
+html.bmgj-sub #contents [class^="board_box"],
+html.bmgj-sub #contents [class*=" board_box"] {
+  width: auto !important;
+  margin: 16px 0 !important;
+  padding: 18px 20px !important;
+  border: 1px solid var(--bmgj-border) !important;
+  border-radius: 16px;
+  background: var(--bmgj-card) !important;
+}
+html.bmgj-sub #contents [class*="board_box"] p { margin: 0; color: var(--bmgj-text) !important; }
 
 /* ── 탭(원본 .tab_top·.tab_common·.tab_01·.tab_02·.tab_text): 원본 파란 탭을 초록 둥근 탭으로 ──
    디자인 통일(2026-11-26): a-m01-m05 테마(이재혁)의 탭 규칙을 모든 하위 페이지에 쓰도록 옮김. */
@@ -276,14 +292,6 @@ html.bmgj-sub #contents a.aButton:hover { border-color: var(--bmgj-brand) !impor
 html.bmgj-sub #contents span.button a[target="_blank"]::after { content: "\00A0↗"; font-weight: 400; }
 
 /* ── 게시판 원본 목록·글 보기(검색 결과, 원래 목록 보기, 글 보기 화면) ── */
-html.bmgj-sub #contents .board_box {
-  margin: 0 0 16px;
-  padding: 12px 16px;
-  border: 0 !important;
-  border-radius: 12px;
-  background: var(--bmgj-strip) !important;
-}
-html.bmgj-sub #contents .board_box p { margin: 0; color: var(--bmgj-text) !important; }
 html.bmgj-sub #contents table.board_notice td a { color: var(--bmgj-text); text-decoration: none; }
 html.bmgj-sub #contents table.board_notice td a:hover { text-decoration: underline; }
 html.bmgj-sub #contents table.board_notice tr.bg td,
@@ -351,11 +359,8 @@ html.bmgj-sub #secrion .page_info .info li { margin: 0; line-height: 1.5; }
 /* ── 좁은 화면 ── */
 @media (max-width: 1279px) {
   html.bmgj-sub #secrion { padding: 0 24px !important; }
-  html.bmgj-sub #bmgj-sub-footer { padding: 0 24px 96px; }
 }
 @media (max-width: 767px) {
   html.bmgj-sub #secrion { padding: 0 16px !important; }
-  html.bmgj-sub #bmgj-sub-footer { padding: 0 16px 96px; }
-  html.bmgj-sub #secrion #colgroup { padding: 20px !important; border-radius: 20px; }
-  html.bmgj-sub #contents h3 { font-size: 20px !important; }
+  html.bmgj-sub #secrion #colgroup { padding: 24px 20px 28px !important; border-radius: 20px; }
 }

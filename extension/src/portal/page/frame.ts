@@ -39,6 +39,7 @@ export function applyPageFrame(frame: HTMLIFrameElement, page: PortalPage): bool
       doc.head.append(style);
     }
     doc.documentElement.classList.add(FRAME_CLASS);
+    unlockFrameWidth(frame);
     enhanceLayout(doc);
     page.entry.enhance?.(doc);
     return true;
@@ -49,7 +50,28 @@ export function applyPageFrame(frame: HTMLIFrameElement, page: PortalPage): bool
   }
 }
 
+/**
+ * 원본 포털 CSS가 프레임에 min-width: 1000px를 걸어 두어 좁은 화면에서 가로로 넘친다(디자인 통일 2026-11-26 확인).
+ * 공통 틀이 켜진 동안만 풀어 준다. 프레임의 style 속성은 첫 화면 코드(portalDom의 hideFrame/restoreFrame)가
+ * 통째로 저장·복원하므로 건드리지 않고, 클래스 + 바깥 문서 CSS로 푼다.
+ */
+const WIDE_CLASS = 'bmgj-page-frame-fluid';
+const OUTER_STYLE_ID = 'bmgj-page-outer-style';
+function unlockFrameWidth(frame: HTMLIFrameElement): void {
+  if (!document.getElementById(OUTER_STYLE_ID)) {
+    const style = document.createElement('style');
+    style.id = OUTER_STYLE_ID;
+    style.textContent = `iframe.${WIDE_CLASS}{min-width:0 !important;}`;
+    (document.head ?? document.documentElement).append(style);
+  }
+  frame.classList.add(WIDE_CLASS);
+}
+function restoreFrameWidth(frame: HTMLIFrameElement): void {
+  frame.classList.remove(WIDE_CLASS);
+}
+
 export function removePageFrame(frame: HTMLIFrameElement): void {
+  restoreFrameWidth(frame);
   const doc = frameDocument(frame);
   if (!doc) return;
   doc.getElementById(STYLE_ID)?.remove();

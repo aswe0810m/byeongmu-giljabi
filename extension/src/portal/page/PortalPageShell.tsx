@@ -4,13 +4,16 @@
 // 그룹·화면 모드는 PortalApp 의 상태와 저장 함수를 그대로 받아 쓴다(첫 화면과 같은 값).
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { GroupId } from '../../catalog/cards';
 import { PORTAL_SITEMAP } from '../../catalog/portalCards';
 import type { MenuCategory } from '../../menu/readAllMenu';
 import type { ViewMode } from '../../storage/prefs';
 import { AllMenuDialog } from '../../ui/AllMenuDialog';
+import { Footer } from '../../ui/Footer';
 import { Header } from '../../ui/Header';
 import { MyInfoWidget } from '../../ui/MyInfoButton';
+import baseStyles from '../../ui/styles.css?inline';
 import { PortalSessionControls } from '../PortalSessionControls';
 import { frameDocument } from '../portalDom';
 import { ORIGINAL_EXTRA, activeMenuNos, applyPageFrame, fitFrame, hasPageFrame, removePageFrame } from './frame';
@@ -20,6 +23,34 @@ import type { PortalPage } from './registry';
 import { findPortalPage } from './registry';
 
 const EG_LOGO = 'https://mwpt.mma.go.kr/caisBMHS/images/inc/eg_logo.png';
+const FOOTER_HOST_ID = 'bmgj-page-footer';
+
+/**
+ * 프레임 아래에 푸터 자리(Shadow DOM)를 만든다(디자인 통일 2026-11-26: 병무청 하위 페이지·첫 화면과 같이 푸터를 둠).
+ * 바깥 틀의 React 루트는 프레임 위에 있으므로 프레임 뒤에 따로 자리를 만들고 portal로 그린다.
+ */
+function useFooterMount(frame: HTMLIFrameElement, on: boolean): HTMLElement | null {
+  const [mount, setMount] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!on) return;
+    document.getElementById(FOOTER_HOST_ID)?.remove();
+    const host = document.createElement('div');
+    host.id = FOOTER_HOST_ID;
+    host.className = 'bmgj-theme-portal'; // 병무민원 화면 색(styles.css의 :host(.bmgj-theme-portal))
+    const shadow = host.attachShadow({ mode: 'open' });
+    const style = document.createElement('style');
+    style.textContent = baseStyles;
+    const container = document.createElement('div');
+    shadow.append(style, container);
+    frame.insertAdjacentElement('afterend', host);
+    setMount(container);
+    return () => {
+      host.remove();
+      setMount(null);
+    };
+  }, [frame, on]);
+  return mount;
+}
 
 interface PortalPageShellProps {
   frame: HTMLIFrameElement;
@@ -47,6 +78,7 @@ export function PortalPageShell({
   const focusAfter = useRef<'toggle' | 'original' | null>(null);
 
   const improved = viewMode === 'improved' && page !== null;
+  const footerMount = useFooterMount(frame, improved);
 
   // 프레임이 새 화면을 열 때마다 등록된 카드 화면인지 다시 본다.
   useEffect(() => {
@@ -159,6 +191,13 @@ export function PortalPageShell({
           <PageHead page={page} />
         </div>
       </div>
+      {footerMount && createPortal(
+        // 위 여백은 Footer 자체의 margin-top(패널→푸터 간격, 병무청과 같음), 아래 96px는 내 정보 버튼 자리
+        <div className="bmgj-page" style={{ paddingTop: 0 }}>
+          <div className="bmgj-container"><Footer /></div>
+        </div>,
+        footerMount,
+      )}
       {group && <MyInfoWidget isMainPage />}
       {allMenuOpen && <AllMenuDialog menu={menu} onClose={closeAllMenu} />}
       {toast}

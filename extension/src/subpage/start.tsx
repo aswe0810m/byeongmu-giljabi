@@ -18,6 +18,21 @@ import {
 const SHADOW_STYLES = `${baseStyles}\n${subpageStyles}`;
 
 let root: Root | null = null;
+
+/**
+ * 이미지 지도(<img usemap>)의 클릭 영역 좌표는 원래 화면에서 그려진 크기 기준이다(예: A-M10은 원본 700px 그림을
+ * 본문 폭 740px로 늘린 크기 기준). 새 화면은 본문 폭이 달라지므로, 화면을 바꾸기 전에 원래 너비를 재서 그 너비로 고정한다.
+ * 원래 화면에서도 같은 너비라 모양이 바뀌지 않는다(버그 수정 2026-11-26).
+ */
+function pinImageMaps(contents: HTMLElement): void {
+  contents.querySelectorAll<HTMLImageElement>('img[usemap]').forEach((img) => {
+    const width = img.getBoundingClientRect().width;
+    if (width <= 0) return; // 숨겨진 그림(접힌 탭 등)은 건드리지 않는다
+    img.style.setProperty('width', `${width}px`, 'important');
+    img.style.setProperty('max-width', 'none', 'important');
+    img.style.setProperty('height', 'auto', 'important');
+  });
+}
 let current: Subpage | null = null;
 
 /** 호스트에 Shadow DOM을 붙이고 React가 그릴 자리를 돌려준다. */
@@ -64,6 +79,7 @@ export async function startSubpage(): Promise<boolean> {
     const prefs = await loadPrefs();
 
     current = page;
+    pinImageMaps(dom.contents);
     ensureDocStyle(contentStyles);
     ensurePageStyle(page.entry?.docCss);
     const hosts = ensureHosts(dom, page.kind);

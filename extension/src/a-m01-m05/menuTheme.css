@@ -57,10 +57,11 @@ html.bmgj-sub[data-bmgj-a-m01-m05-theme] #contents .conBlueBox {
   border-radius: 12px !important; border-color: var(--bmgj-a-m01-m05-green) !important;
 }
 html.bmgj-sub[data-bmgj-a-m01-m05-theme] #contents :is(.conBlueBox, .conBlueBox *) { font-family: inherit !important; }
-html.bmgj-sub[data-bmgj-a-m01-m05-theme] #contents :is(.board_box_private, .board_box) {
+/* 안내 및 신청의 군 구분 상자(.board_box_private). 일반 .board_box는 공통 틀의 옅은 상자를 쓴다. */
+html.bmgj-sub[data-bmgj-a-m01-m05-theme] #contents .board_box_private {
   border: 1px solid var(--bmgj-a-m01-m05-line) !important; background: var(--bmgj-a-m01-m05-mint) !important; border-radius: 12px;
 }
-html.bmgj-sub[data-bmgj-a-m01-m05-theme] #contents :is(.board_box_private, .board_box) :is(p, strong) { color: var(--bmgj-a-m01-m05-green) !important; }
+html.bmgj-sub[data-bmgj-a-m01-m05-theme] #contents .board_box_private :is(p, strong) { color: var(--bmgj-a-m01-m05-green) !important; }
 @media (max-width: 767px) {
   html.bmgj-sub[data-bmgj-a-m01-m05-theme="overview"] #contents > .layout_h3 { grid-template-columns: 1fr; gap: 24px; }
   html.bmgj-sub[data-bmgj-a-m01-m05-theme="overview"] #contents .layout_h3 > div > div { float: none !important; margin-right: 0 !important; height: auto !important; }

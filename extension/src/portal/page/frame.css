@@ -64,7 +64,8 @@ html.bmgj-page-frame #sub_layout {
   width: auto !important;
   max-width: 1248px;
   margin: 0 auto !important;
-  padding: 0 32px 64px !important;
+  /* 아래 여백은 바깥 틀의 푸터(PortalPageShell)가 맡는다(병무청 하위 페이지와 같은 패널→푸터 간격) */
+  padding: 0 32px !important;
   background: none !important;
 }
 html.bmgj-page-frame #sub_layout::after { content: ""; display: block; clear: both; }
@@ -554,3 +555,8 @@ html.bmgj-page-frame #contents p[data-bmgj-page][data-bmgj-page="action-q"] {
 html.bmgj-page-frame #contents p[data-bmgj-page][data-bmgj-page="action-btn"] { margin-top: 14px !important; }
 html.bmgj-page-frame #contents p[data-bmgj-page][data-bmgj-page="action"] { margin-top: 28px !important; }
 html.bmgj-page-frame #contents p[data-bmgj-page^="action"] span.button.blue > a { min-width: 180px; min-height: 52px; font-size: 16px !important; }
+
+/* 좁은 창(1,279px 이하): 병무청 하위 페이지·헤더와 같은 좌우 여백(디자인 통일 2026-11-26). 프레임 너비 기준이다 */
+@media (max-width: 1279px) {
+  html.bmgj-page-frame #sub_layout { padding: 0 24px !important; }
+}
