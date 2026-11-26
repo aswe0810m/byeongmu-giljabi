@@ -40,6 +40,7 @@ export function registerMyPages(): void {
 ```
 
 - `mc`: `contents.do?mc=` 값. `cardId`: 그 페이지로 오는 메인 카드(`catalog/cards.ts`). 배너에 그 카드가 나온다.
+- 탭으로 이어진 페이지 묶음(군별·분야별 탭 등)은 주소 하나가 아니라 `registerSubpageFamilies([{ id, cardId, match }])`로 등록한다. `match()`는 원본을 숨기기 전에 불리므로 원본 DOM(예: `#colgroup .tab_top a[href*="mc=…"]`)으로 판단하면 된다(`a-m01-m05/register.ts` 참고).
 - 제목·목록·표·버튼·탭·만족도 조사 모양은 공통 `content.css`가 맡는다. 페이지만의 CSS에는 그 페이지에만 필요한 것만 쓴다.
 
 병무민원 세부 화면은 `src/portal/page/registry.ts`의 `registerPortalPages()`로 등록한다(`p-a-left.md`, `p-a-right.md` 참고).
@@ -68,3 +69,10 @@ export function registerMyPages(): void {
 - 병무민원 세부 화면은 원본 포털 CSS가 프레임에 `min-width: 1000px`를 걸어 1000px보다 좁은 창(반쪽 화면 등)에서 가로로 넘쳤다. 공통 틀이 켜진 동안만 프레임에 클래스(`bmgj-page-frame-fluid`)를 붙여 푼다. 프레임의 `style` 속성은 첫 화면 코드가 저장·복원하므로 건드리지 않는다.
 - 색은 그대로 사이트별로 다르다(글자: 병무청 #1D3530, 병무민원 #1B2440).
 - 크롬 확장 프로그램이라 데스크톱만 대상으로 한다(모바일 화면은 고려하지 않음).
+
+## 버그 수정 (2026-11-26)
+
+- 탭 묶음 페이지(안내 및 지원절차의 해군 등, 이달의 모집계획의 군별 게시판)가 원본 화면으로 나오던 문제 → 탭 묶음 등록(위 "페이지 추가 방법").
+- 이미지 지도(`<img usemap>`) 클릭 영역이 어긋나던 문제(A-M10): 좌표는 원래 화면에서 그려진 크기 기준인데(700px 그림을 740px로 늘린 크기) 새 화면이 다른 크기로 그렸다. 화면을 바꾸기 전에 원래 너비를 재서 그 너비로 고정한다(`subpage/start.tsx`의 `pinImageMaps`).
+- 원래 화면과 새 화면을 비교하는 점검(본문 요소 사라짐·패널 밖 넘침·이미지 지도 너비)을 13개 페이지에서 돌려 문제 없음을 확인했다.
+

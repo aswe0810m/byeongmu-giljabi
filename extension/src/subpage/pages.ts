@@ -6,9 +6,8 @@
 import { getCard, type HomeCard } from '../catalog/cards';
 import { NOTICE_BOARDS, type NoticeBoardDef } from './notice/boards';
 
-export interface SubpageEntry {
-  /** contents.do?mc= 값 */
-  mc: string;
+/** 등록 내용의 공통 부분 */
+export interface SubpageEntryBase {
   /** 이 페이지로 오는 메인 카드 ID(catalog/cards.ts). 배너에 그 카드의 아이콘·이름·설명이 나온다. */
   cardId: string;
   /** 이 페이지에만 넣을 문서 CSS. 선택자는 html.bmgj-sub 아래로 쓴다(원래 화면에서는 적용되지 않도록). */
@@ -17,7 +16,35 @@ export interface SubpageEntry {
   rootAttrs?: Record<string, string>;
 }
 
+export interface SubpageEntry extends SubpageEntryBase {
+  /** contents.do?mc= 값 */
+  mc: string;
+}
+
+/**
+ * 탭으로 이어진 페이지 묶음(버그 수정 2026-11-26). 카드가 여는 첫 페이지의 탭(군별·분야별 등)을 누르면 mc가 다른
+ * 페이지로 넘어가므로, 주소 하나가 아니라 "이 묶음의 탭이 있는 페이지"를 같은 카드의 페이지로 본다.
+ */
+export interface SubpageFamily extends SubpageEntryBase {
+  /** 기록·오류 안내용 이름 */
+  id: string;
+  /** 지금 문서가 이 묶음의 페이지면 true. 원본을 숨기기 전(시작할 때)에 부른다. */
+  match: () => boolean;
+}
+
 const contentPages = new Map<string, SubpageEntry>();
+const families: SubpageFamily[] = [];
+
+/** 탭 묶음을 등록한다. mc로 등록한 페이지가 먼저이고, 묶음은 등록한 순서대로 본다. */
+export function registerSubpageFamilies(list: SubpageFamily[]): void {
+  for (const family of list) {
+    if (families.some((f) => f.id === family.id)) {
+      console.error('[bmgj] subpage family already registered', family.id);
+      continue;
+    }
+    families.push(family);
+  }
+}
 
 /** 페이지를 등록한다. 같은 mc가 이미 있으면 먼저 등록한 것을 두고 콘솔에 알린다. */
 export function registerSubpages(entries: SubpageEntry[]): void {
@@ -53,7 +80,7 @@ export interface Subpage {
   /** 배너에 보여 줄 카드 */
   card: HomeCard;
   /** 본문 페이지면 등록 내용 */
-  entry: SubpageEntry | null;
+  entry: SubpageEntryBase | null;
   /** 게시판 페이지일 때 그 게시판 */
   board: NoticeBoardDef | null;
 }
@@ -84,15 +111,27 @@ export function detectSubpage(): Subpage | null {
     if (path === '/contents.do') {
       const codes = params.getAll('mc');
       const entry = codes.length === 1 ? contentPages.get(codes[0]) : undefined;
-      return entry ? { kind: 'content', card: getCard(entry.cardId), entry, board: null } : null;
+      if (entry) return { kind: 'content', card: getCard(entry.cardId), entry, board: null };
     }
 
     if (path === '/board/boardList.do' || path === '/board/boardView.do') {
       const board = boardFrom(params.get('gesipan_id') ?? (formValue('gesipan_id') || null));
-      if (!board) return null;
-      const card = getCard(NOTICE_CARD);
-      if (path === '/board/boardView.do') return { kind: 'notice-view', card, entry: null, board };
-      return { kind: isFirstPlainPage(params) ? 'notice-list' : 'board-list', card, entry: null, board };
+      if (board) {
+        const card = getCard(NOTICE_CARD);
+        if (path === '/board/boardView.do') return { kind: 'notice-view', card, entry: null, board };
+        return { kind: isFirstPlainPage(params) ? 'notice-list' : 'board-list', card, entry: null, board };
+      }
+    }
+
+    // 탭 묶음: 첫 페이지에서 탭을 눌러 넘어간 페이지(주소는 contents.do가 아닐 수도 있다)
+    for (const family of families) {
+      let matched = false;
+      try {
+        matched = family.match();
+      } catch (error) {
+        console.error('[bmgj] subpage family match failed', family.id, error);
+      }
+      if (matched) return { kind: 'content', card: getCard(family.cardId), entry: family, board: null };
     }
   } catch (error) {
     console.error('[bmgj] subpage card not found', error);
