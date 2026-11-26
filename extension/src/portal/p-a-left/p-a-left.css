@@ -1,0 +1,12 @@
+/* p-a-left: 다음연도 접수 일정 화면에만 넣는 프레임 CSS(공통 틀 frame.css 뒤에 붙음).
+   관할 지방청 칸: 진하게 칠하고 글자는 흰색 굵게(대비 7:1 이상). 그 칸의 시간·날짜 머리는 옅게. */
+html.bmgj-page-frame #contents td[data-bmgj-p-a-left-mine] {
+  background: var(--brand-solid) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+html.bmgj-page-frame #contents td[data-bmgj-p-a-left-mine] * { color: #FFFFFF !important; }
+html.bmgj-page-frame #contents th[data-bmgj-p-a-left-mine-axis] {
+  background-color: var(--hero-btn) !important;
+  color: var(--text-link) !important;
+}
