@@ -14,6 +14,7 @@ import { registerPARight } from '../portal/p-a-right/register';
 import { openProfileGuideAfterLogin, startProfileSync } from '../profile/profileSync';
 import { findPortalFrame, readPortalMenu, restoreFrame } from '../portal/portalDom';
 import { MyInfoWidget } from '../ui/MyInfoButton';
+import { startPortalLoginWatch } from '../my-info/portalLogin';
 import { startSubpage } from '../subpage/start';
 import { registerAM01M05 } from '../a-m01-m05/register';
 import styles from '../ui/styles.css?inline';
@@ -96,6 +97,7 @@ async function startPortal(): Promise<void> {
   const frame = findPortalFrame();
   if (!frame) return; // 팝업 등 틀이 없는 포털 화면
   openProfileGuideAfterLogin(frame);
+  startPortalLoginWatch(frame); // 내 정보: 로그인 남은 시간
 
   const check = validateCatalog(portalCards, portalLayouts, PORTAL_EXPECTED_COUNTS);
   if (!check.ok) {
