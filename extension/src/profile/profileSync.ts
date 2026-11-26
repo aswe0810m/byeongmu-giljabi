@@ -155,7 +155,7 @@ export function startProfileSync(): void {
     working = true;
     try {
       const saved = await chrome.storage.local.get([PROFILE_KEY, PROFILE_SYNC_KEY]);
-      const previous = saved[PROFILE_KEY] && typeof saved[PROFILE_KEY] === 'object' ? saved[PROFILE_KEY] : {};
+      const previous = (saved[PROFILE_KEY] && typeof saved[PROFILE_KEY] === 'object' ? saved[PROFILE_KEY] : {}) as Partial<Record<FieldKey, string>>;
       const differentPerson = saved[PROFILE_SYNC_KEY] && (
         (previous.fullName && previous.fullName !== found.fullName)
         || (previous.birthDate && previous.birthDate !== found.birthDate)

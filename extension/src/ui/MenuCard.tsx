@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import type { HomeCard, IconKey, MenuLink } from '../catalog/cards';
 
-const ICONS: Record<IconKey, LucideIcon> = {
+export const ICONS: Record<IconKey, LucideIcon> = {
   megaphone: Megaphone,
   calendar: Calendar,
   'book-open': BookOpen,
