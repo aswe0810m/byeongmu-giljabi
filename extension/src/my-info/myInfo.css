@@ -1,0 +1,219 @@
+/* 내 정보 추가 화면(사용자 결정 2026-11-26): 분야 고르기, 지원 분야 변경 버튼, 로그인 남은 시간, 인적사항 묶음 */
+
+/* ── 분야 고르기 */
+.bmgj-pick-step {
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.bmgj-pick-step legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 750;
+  color: #203d33;
+}
+.bmgj-pick-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #286c50;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+.bmgj-pick-options {
+  display: grid;
+  gap: 8px;
+}
+.bmgj-pick-options-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bmgj-pick-options-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.bmgj-pick-options-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.bmgj-pick-option {
+  min-height: 46px;
+  padding: 8px 6px;
+  border: 1px solid #cfe1d5;
+  border-radius: 13px;
+  background: #fff;
+  color: #2a4d3e;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: keep-all;
+  cursor: pointer;
+}
+.bmgj-pick-option:hover {
+  border-color: #79b496;
+  background: #f3faf5;
+}
+.bmgj-pick-option[aria-pressed='true'] {
+  border-color: #286c50;
+  background: #286c50;
+  color: #fff;
+}
+.bmgj-pick-summary {
+  margin: 4px 0 0;
+  padding: 11px 13px;
+  border-radius: 13px;
+  background: #fff;
+  border: 1px dashed #bcd9c5;
+  color: #2f5545;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* ── 나의 지원 D-Day: 지원 분야 변경·일정 새로고침(예전 12px 글자 링크 → 큰 버튼 두 줄) */
+.bmgj-role-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin: 14px 0 4px;
+}
+.bmgj-role-action {
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #cfe1d5;
+  border-radius: 14px;
+  background: #fff;
+  color: #245f47;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.bmgj-role-action:hover {
+  background: #f0f7f2;
+}
+.bmgj-role-action:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.bmgj-role-action-main {
+  border-color: #286c50;
+  background: #286c50;
+  color: #fff;
+}
+.bmgj-role-action-main:hover {
+  background: #1a533c;
+}
+
+/* ── 로그인 남은 시간 */
+.bmgj-login-on .bmgj-login-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #cfe5d7;
+  color: #2f5545;
+  font-size: 14px;
+  font-weight: 700;
+}
+.bmgj-login-on .bmgj-login-time b {
+  margin-left: auto;
+  font-size: 24px;
+  font-weight: 850;
+  color: #166b46;
+  font-variant-numeric: tabular-nums;
+}
+.bmgj-login-soon {
+  background: #fff6e8;
+  border-color: #f0d6a8;
+}
+.bmgj-login-soon .bmgj-login-time b {
+  color: #a4570a;
+}
+
+/* ── 인적사항 묶음 */
+.bmgj-info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px 0 0;
+  padding: 16px 14px;
+  border: 1px solid #e1ece4;
+  border-radius: 18px;
+  background: #fbfdfb;
+  min-width: 0;
+}
+.bmgj-info-group legend {
+  padding: 0 6px;
+  font-size: 15px;
+  font-weight: 750;
+  color: #203d33;
+}
+.bmgj-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e6efe8;
+}
+.bmgj-info-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.bmgj-info-row-head strong {
+  font-size: 14px;
+  color: #2f5545;
+}
+.bmgj-info-remove {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: #a23b2f;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.bmgj-info-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.bmgj-info-add {
+  width: 100%;
+}
+.bmgj-info-empty {
+  margin: 0;
+  font-size: 13px;
+  color: #6b8273;
+}
+select.bmgj-profile-input {
+  appearance: auto;
+  cursor: pointer;
+}
+.bmgj-info-line {
+  display: block;
+}
+.bmgj-info-line + .bmgj-info-line {
+  margin-top: 6px;
+}
+.bmgj-info-line small {
+  display: block;
+  font-size: 12px;
+  color: #697f72;
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .bmgj-pick-options-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

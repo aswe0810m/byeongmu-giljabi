@@ -1,8 +1,11 @@
 // 병무민원 통합지원서의 인적사항 표에 보이는 값만 chrome.storage.local에 저장한다.
 // 로그인 자격 증명·쿠키·세션 토큰·비밀번호·인증번호·주민등록번호는 읽거나 저장하지 않는다.
+// (사용자 결정 2026-11-26) 저장 항목은 전화번호·휴대전화·전자우편·응시지역 병무청만 읽는다.
+// 성명·생년월일은 저장하지 않고, 다른 사람이 같은 브라우저로 로그인했는지 가리는 데만 해시로 쓴다.
 import { portalMenuUrl } from '../catalog/portalCards';
+import { matchOffice } from '../my-info/options';
 import { readSession } from '../portal/portalDom';
-import { PROFILE_KEY, PROFILE_SYNC_HASH, PROFILE_SYNC_KEY } from './profile';
+import { PROFILE_KEY, PROFILE_KEY_V1, PROFILE_SYNC_HASH, PROFILE_SYNC_KEY, cleanProfile, emptyProfile, profileFromStorage } from './profile';
 
 const APPLICATION_PATH = '/caisBMHS/dmem/dmem/mwgr/gjwn/moveTHJWSJSGBJeongBoIR_M.do';
 const APPLICATION_MENU = '22041';
@@ -45,13 +48,13 @@ export function openProfileGuideAfterLogin(frame: HTMLIFrameElement): void {
   check();
 }
 
-type FieldKey =
-  | 'fullName' | 'birthDate' | 'contactPhone' | 'mobilePhone' | 'militaryEmail'
-  | 'registeredOffice' | 'personalEmail' | 'applicationOffice' | 'address';
+/** 표에서 읽는 칸. fullName·birthDate는 본인 확인용(저장 안 함). */
+type FieldKey = 'fullName' | 'birthDate' | 'contactPhone' | 'mobilePhone' | 'email' | 'applicationOffice';
+type SavedKey = Exclude<FieldKey, 'fullName' | 'birthDate'>;
+const SAVED_KEYS: SavedKey[] = ['contactPhone', 'mobilePhone', 'email', 'applicationOffice'];
 
 const CAPS: Record<FieldKey, number> = {
-  fullName: 60, birthDate: 10, contactPhone: 24, mobilePhone: 24, militaryEmail: 120,
-  registeredOffice: 80, personalEmail: 120, applicationOffice: 80, address: 260,
+  fullName: 60, birthDate: 10, contactPhone: 24, mobilePhone: 24, email: 120, applicationOffice: 40,
 };
 
 const normal = (v: unknown) => String(v || '').replace(/[\s:*＊•·()（）[\]【】/]/g, '').trim();
@@ -66,19 +69,16 @@ function labelKey(label: string | null): FieldKey | null {
   if (!s || s.length > 36) return null;
   if (/^(성명|이름|지원자성명)$/.test(s)) return 'fullName';
   if (/^(생년월일|출생일)$/.test(s)) return 'birthDate';
-  if (/^(전화번호|비상연락처|비상전화번호|전화번호비상연락처|유선전화|연락전화번호)$/.test(s)) return 'contactPhone';
+  if (/^(전화번호|유선전화|연락전화번호)$/.test(s)) return 'contactPhone';
   if (/^(휴대전화|휴대폰|휴대전화번호|휴대폰번호|핸드폰번호)$/.test(s)) return 'mobilePhone';
-  if (/나라사랑(메일|이메일|전자우편)?/.test(s)) return 'militaryEmail';
-  if (/^(병적지청|병적지방병무청)$/.test(s)) return 'registeredOffice';
   if (/^(응시지역병무청|응시지역|응시지방병무청|응시지구)$/.test(s)) return 'applicationOffice';
-  if (/^(전자우편|전자우편상용|전자우편일반|상용이메일|일반이메일|이메일|이메일주소)$/.test(s)) return 'personalEmail';
-  if (/^(주소|현주소|거주지주소|도로명주소)$/.test(s)) return 'address';
+  if (/^(전자우편|전자우편상용|전자우편일반|상용이메일|일반이메일|이메일|이메일주소)$/.test(s)) return 'email';
   return null;
 }
 
 type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 
-function readCell(cell: HTMLTableCellElement, key: FieldKey): string {
+function readCell(cell: HTMLTableCellElement): string {
   if (!visible(cell)) return '';
   const controls = [...cell.querySelectorAll<FormControl>('input,textarea,select')];
   if (!controls.length) return cell.innerText ?? cell.textContent ?? '';
@@ -96,7 +96,7 @@ function readCell(cell: HTMLTableCellElement, key: FieldKey): string {
   }).filter(Boolean);
 
   // 입력칸이 있는 셀의 안내 문구는 저장하지 않는다.
-  return key === 'address' ? values.join(' ') : values[0] ?? '';
+  return values[0] ?? '';
 }
 
 function valid(key: FieldKey, raw: string): string {
@@ -116,12 +116,18 @@ function valid(key: FieldKey, raw: string): string {
       : '';
   }
   if (key === 'contactPhone' || key === 'mobilePhone') return /^[+\d()\s-]{7,24}$/.test(value) ? value : '';
-  if (key === 'militaryEmail' || key === 'personalEmail') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : '';
-  if (key === 'registeredOffice' || key === 'applicationOffice') {
-    return /병무(지)?청|병무지청|서울|부산|대구|경북|광주|전남|대전|충남|경기|강원|충북|전북|경남|제주|인천|울산/.test(value) ? value : '';
+  if (key === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : '';
+  if (key === 'applicationOffice') {
+    return /병무(지)?청|병무지청|서울|부산|대구|경북|광주|전남|대전|충남|경기|강원|충북|전북|경남|제주|인천|울산/.test(value) ? matchOffice(value) : '';
   }
-  if (key === 'address') return value.length >= 5 && !/^\d{5,6}$/.test(value) ? value : '';
   return '';
+}
+
+/** 성명+생년월일 SHA-256(본인 확인용). 원문은 저장하지 않는다. */
+async function ownerHash(name: string, birth: string): Promise<string> {
+  const bytes = new TextEncoder().encode(`${name}|${birth}`);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 /** 병무민원 통합지원서 작성 화면이 열린 프레임에서 실행한다. */
@@ -146,26 +152,30 @@ export function startProfileSync(): void {
       const key = labelKey(header.textContent);
       const cell = header.nextElementSibling;
       if (!key || !visible(header) || !(cell instanceof HTMLTableCellElement) || cell.tagName !== 'TD') continue;
-      const checked = valid(key, readCell(cell, key));
+      const checked = valid(key, readCell(cell));
       if (checked && !found[key]) found[key] = checked;
     }
+    // 성명·생년월일이 보이는 본인 표에서만 읽는다(다른 표를 잘못 읽지 않게).
     if (!found.fullName || !found.birthDate) return;
+    const fields = SAVED_KEYS.filter((key) => found[key]);
+    if (!fields.length) return;
     const signature = JSON.stringify(found);
     if (signature === last) return;
     working = true;
     try {
-      const saved = await chrome.storage.local.get([PROFILE_KEY, PROFILE_SYNC_KEY]);
-      const previous = (saved[PROFILE_KEY] && typeof saved[PROFILE_KEY] === 'object' ? saved[PROFILE_KEY] : {}) as Partial<Record<FieldKey, string>>;
-      const differentPerson = saved[PROFILE_SYNC_KEY] && (
-        (previous.fullName && previous.fullName !== found.fullName)
-        || (previous.birthDate && previous.birthDate !== found.birthDate)
-      );
-      const next = differentPerson ? found : { ...previous, ...found };
-      if (!saved[PROFILE_SYNC_KEY] || JSON.stringify(next) !== JSON.stringify(previous)) {
+      const owner = await ownerHash(found.fullName, found.birthDate);
+      const saved = await chrome.storage.local.get([PROFILE_KEY, PROFILE_KEY_V1, PROFILE_SYNC_KEY]);
+      const sync = saved[PROFILE_SYNC_KEY] as { owner?: string } | undefined;
+      const previous = profileFromStorage(saved);
+      // 다른 사람이 로그인했으면 이전 사람의 인적사항(학력·자격증 포함)을 이어 쓰지 않는다.
+      const differentPerson = !!sync?.owner && sync.owner !== owner;
+      const next = cleanProfile({ ...(differentPerson ? emptyProfile() : previous), ...Object.fromEntries(fields.map((k) => [k, found[k]])) });
+      if (!sync || differentPerson || saved[PROFILE_KEY_V1] || JSON.stringify(next) !== JSON.stringify(previous)) {
         await chrome.storage.local.set({
           [PROFILE_KEY]: next,
-          [PROFILE_SYNC_KEY]: { updatedAt: new Date().toISOString(), fields: Object.keys(found), source: 'visible-application-form' },
+          [PROFILE_SYNC_KEY]: { updatedAt: new Date().toISOString(), fields, owner, source: 'visible-application-form' },
         });
+        await chrome.storage.local.remove(PROFILE_KEY_V1);
       }
       last = signature;
     } catch {

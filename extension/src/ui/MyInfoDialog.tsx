@@ -1,19 +1,27 @@
 // 3.6 내 정보 창 — 팀 구현(bmgj-recruit-dday-update, v0.5.1)을 소스로 옮김(0.4.8). 화면과 동작은 그대로.
 // 지원 희망 분야와 공식 모집 일정 D-Day, 인적사항(직접 입력 또는 병무민원 통합지원서에서 자동 반영), 화면 설정.
 // 모든 값은 이 브라우저(chrome.storage.local)에만 저장한다.
+// (사용자 결정 2026-11-26) 전역·예비군(B 그룹)은 지원 분야·D-Day 없이 인적사항과 화면 설정만 보여 줌.
+// 지원 분야는 목록에서 고르기, 로그인돼 있으면 공식 로그인 안내 대신 남은 시간, 인적사항 항목 변경(src/my-info).
 import { Fragment, useEffect, useRef, useState, type FormEvent } from 'react';
 import type { GroupId } from '../catalog/cards';
 import { GROUP_LABELS } from '../catalog/cards';
 import { getPortalCard } from '../catalog/portalCards';
-import type { Profile, ProfileField, Target } from '../profile/profile';
+import type { Profile, Target } from '../profile/profile';
 import {
-  PROFILE_FIELDS, PROFILE_KEY, PROFILE_SYNC_HASH, PROFILE_SYNC_KEY, TARGET_KEY, cleanProfile, cleanTarget, countdown, emptyProfile,
+  PROFILE_KEY, PROFILE_KEY_V1, PROFILE_SYNC_HASH, PROFILE_SYNC_KEY, TARGET_KEY,
+  cleanProfile, cleanTarget, countdown, emptyProfile, profileFromStorage, profileHasValue, tidyProfile,
 } from '../profile/profile';
 import type { RecruitCache } from '../profile/recruit';
 import {
   RECRUIT_INDEX_URL, RECRUIT_KEY, RECRUIT_MAX_AGE, RECRUIT_REFRESH_MS,
-  recruitBadge, recruitDateText, recruitForRole, recruitMonthLabel, refreshRecruit,
+  recruitBadge, recruitDateText, recruitMonthLabel, refreshRecruit,
 } from '../profile/recruit';
+import { LoginBox } from '../my-info/LoginBox';
+import { schedulesForTarget } from '../my-info/match';
+import myInfoCss from '../my-info/myInfo.css?inline';
+import { ProfileFormFields, ProfileValues } from '../my-info/ProfileForm';
+import { RolePicker } from '../my-info/RolePicker';
 import type { Prefs } from '../storage/prefs';
 import { clearPrefs, loadPrefs, saveGroup, saveViewMode, subscribePrefs } from '../storage/prefs';
 
@@ -37,7 +45,6 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
   const [resetConfirm, setResetConfirm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [target, setTarget] = useState<Target | null>(null);
-  const [roleText, setRoleText] = useState('어학병');
   const [roleEditing, setRoleEditing] = useState(false);
   const [roleBusy, setRoleBusy] = useState(false);
   const [syncedAt, setSyncedAt] = useState<string | null>(null);
@@ -46,28 +53,27 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
   const [recruitError, setRecruitError] = useState('');
   const [, setNowTick] = useState(0);
   const root = useRef<HTMLElement>(null);
-  const firstInput = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const alive = useRef(true);
-  const editedFields = useRef(new Set<string>());
+  /** 사용자가 입력칸을 고쳤는지. 고치기 전이면 통합지원서에서 들어온 값을 바로 보여 준다. */
+  const dirty = useRef(false);
 
   useEffect(() => {
     let live = true;
-    let profileChanged = false;
     let syncChanged = false;
     alive.current = true;
     void loadPrefs().then((p) => { if (live) setPrefs(p); });
     const unwatch = subscribePrefs(setPrefs);
-    chrome.storage.local.get([PROFILE_KEY, TARGET_KEY, PROFILE_SYNC_KEY, RECRUIT_KEY]).then((data) => {
+    chrome.storage.local.get([PROFILE_KEY, PROFILE_KEY_V1, TARGET_KEY, PROFILE_SYNC_KEY, RECRUIT_KEY]).then((data) => {
       if (!live) return;
-      const current = cleanProfile(data[PROFILE_KEY]);
+      const current = profileFromStorage(data);
       const chosen = cleanTarget(data[TARGET_KEY]);
       setRecruitCache((data[RECRUIT_KEY] as RecruitCache | undefined) || null);
-      if (!profileChanged) {
+      if (!dirty.current) {
         setProfile(current);
-        setEditing(!PROFILE_FIELDS.some((f) => current[f.key].trim()));
+        setEditing(!profileHasValue(current));
       }
       setTarget(chosen);
-      if (chosen) setRoleText(chosen.role);
       const sync = data[PROFILE_SYNC_KEY] as { updatedAt?: string } | undefined;
       if (!syncChanged) setSyncedAt(sync?.updatedAt ?? null);
       setLoading(false);
@@ -80,13 +86,13 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
     });
     const onStorage = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
       if (!live || area !== 'local') return;
-      if (changes[PROFILE_KEY]) {
-        profileChanged = true;
+      if (changes[PROFILE_KEY] && !dirty.current) {
+        // 사용자가 입력 중이면 작성 중인 값을 지킨다(저장하면 작성한 값으로 덮어씀).
         const next = cleanProfile(changes[PROFILE_KEY].newValue);
-        const draftKeys = [...editedFields.current];
-        setProfile((draft) => ({ ...next, ...Object.fromEntries(draftKeys.map((key) => [key, draft[key]])) }));
-        if (!draftKeys.length) setEditing(!PROFILE_FIELDS.some((f) => next[f.key].trim()));
+        setProfile(next);
+        setEditing(!profileHasValue(next));
       }
+      if (changes[TARGET_KEY]) setTarget(cleanTarget(changes[TARGET_KEY].newValue));
       if (changes[RECRUIT_KEY]) {
         setRecruitCache((changes[RECRUIT_KEY].newValue as RecruitCache | undefined) || null);
         setRecruitError('');
@@ -156,11 +162,10 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
     } finally { setRecruitLoading(false); }
   };
 
-  const known = PROFILE_FIELDS.some((f) => profile[f.key].trim());
-  const change = (key: string, value: string) => {
-    editedFields.current.add(key);
-    setProfile((old) => ({ ...old, [key]: value }));
-  };
+  const [savedKnown, setSavedKnown] = useState(false);
+  useEffect(() => { if (!editing) setSavedKnown(profileHasValue(profile)); }, [editing, profile]);
+  const known = savedKnown;
+  const discharged = prefs?.group === 'B';
 
   const save = async (event: FormEvent) => {
     event.preventDefault();
@@ -168,13 +173,11 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
     setBusy(true);
     setNotice('');
     try {
-      const saved = await chrome.storage.local.get(PROFILE_KEY);
-      const latest = cleanProfile(saved[PROFILE_KEY]);
-      for (const key of editedFields.current) latest[key] = profile[key];
-      const cleaned = cleanProfile(latest);
+      const cleaned = tidyProfile(profile);
       await chrome.storage.local.set({ [PROFILE_KEY]: cleaned });
+      await chrome.storage.local.remove(PROFILE_KEY_V1); // 예전 형식(성명·주소 등 포함)은 남기지 않는다
       if (alive.current) {
-        editedFields.current.clear();
+        dirty.current = false;
         setProfile(cleaned);
         setEditing(false);
         setNotice('인적사항을 이 브라우저에 저장했어요.');
@@ -184,14 +187,10 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
     } finally { if (alive.current) setBusy(false); }
   };
 
-  const saveRole = async (event: FormEvent) => {
-    event.preventDefault();
+  const saveRole = async (chosen: Target) => {
     if (roleBusy) return;
-    const name = roleText.trim().slice(0, 60);
-    if (!name) { setNotice('지원 희망 분야를 입력해 주세요.'); return; }
     setRoleBusy(true);
     try {
-      const chosen = { role: name };
       await chrome.storage.local.set({ [TARGET_KEY]: chosen });
       if (alive.current) {
         setTarget(chosen);
@@ -207,9 +206,9 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
     if (busy) return;
     setBusy(true);
     try {
-      await chrome.storage.local.remove([PROFILE_KEY, PROFILE_SYNC_KEY]);
+      await chrome.storage.local.remove([PROFILE_KEY, PROFILE_KEY_V1, PROFILE_SYNC_KEY]);
       if (alive.current) {
-        editedFields.current.clear();
+        dirty.current = false;
         setProfile(emptyProfile());
         setSyncedAt(null);
         setEditing(true);
@@ -245,10 +244,10 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
 
   const cancelEdit = () => {
     if (known) {
-      chrome.storage.local.get(PROFILE_KEY).then((a) => {
+      chrome.storage.local.get([PROFILE_KEY, PROFILE_KEY_V1]).then((a) => {
         if (alive.current) {
-          editedFields.current.clear();
-          setProfile(cleanProfile(a[PROFILE_KEY]));
+          dirty.current = false;
+          setProfile(profileFromStorage(a));
           setEditing(false);
         }
       }).catch(() => setNotice('저장된 정보를 불러오지 못했어요.'));
@@ -257,68 +256,23 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
     }
   };
 
-  const inputField = (f: ProfileField) => (
-    <label className="bmgj-profile-field" key={f.key}>
-      <span className="bmgj-profile-field-name">{f.label}</span>
-      {f.type === 'textarea' ? (
-        <textarea
-          name={f.key} value={profile[f.key]} placeholder={f.placeholder} autoComplete={f.autoComplete}
-          maxLength={f.maxLength} rows={3} disabled={busy} onChange={(e) => change(f.key, e.target.value)} className="bmgj-profile-input"
-        />
-      ) : (
-        <input
-          ref={f.key === 'fullName' ? firstInput : null} name={f.key} value={profile[f.key]} type={f.type}
-          placeholder={f.placeholder} autoComplete={f.autoComplete} maxLength={f.maxLength} disabled={busy}
-          onChange={(e) => change(f.key, e.target.value)} className="bmgj-profile-input"
-        />
-      )}
-    </label>
-  );
-
-  const valField = (f: ProfileField) => (
-    <div className="bmgj-profile-value" key={f.key}>
-      <dt>{f.label}</dt>
-      <dd>{profile[f.key].trim() || '미입력'}</dd>
-    </div>
-  );
-
-  const filteredSchedules = target ? recruitForRole(recruitCache, target.role) : [];
+  const filteredSchedules = target ? schedulesForTarget(recruitCache, target) : [];
   const nextSchedule = filteredSchedules[0] || null;
   const remaining = nextSchedule ? countdown(nextSchedule.endsAt.slice(0, 10)) : null;
   const recruitStale = !!recruitCache?.checkedAt && Date.now() - recruitCache.checkedAt > RECRUIT_MAX_AGE;
   const scheduleLabel = nextSchedule ? recruitBadge(nextSchedule) : '모집 공고 확인 중';
 
   const roleForm = (
-    <form className="bmgj-role-setup" onSubmit={saveRole}>
-      <p className="bmgj-role-eyebrow">{target ? '지원 희망 분야 변경' : '처음 시작하기 · 1단계'}</p>
-      <h3>{target ? '어떤 분야로 지원할까요?' : '어떤 병으로 지원하고 싶나요?'}</h3>
-      <p className="bmgj-role-help">희망 분야를 먼저 저장하면 내 정보에서 지원 마감일까지 남은 날짜를 볼 수 있어요.</p>
-      <label className="bmgj-profile-field">
-        <span className="bmgj-profile-field-name">지원 희망 분야</span>
-        <input
-          className="bmgj-profile-input" type="text" name="role" value={roleText} maxLength={60}
-          placeholder="예: 어학병" required onChange={(e) => setRoleText(e.target.value)}
-        />
-      </label>
-      <div className="bmgj-role-hint">
-        예시: 어학병, 영어어학병, 기술행정병, 기술병, 정보보호병
-        <span> · 공식 모집 일정에서 키워드별로 검색합니다.</span>
-      </div>
-      <button type="submit" className="bmgj-profile-primary" disabled={roleBusy}>
-        {roleBusy ? '저장하는 중…' : target ? '지원 분야 변경 저장' : '이 분야로 시작하기'}
-      </button>
-      {target && (
-        <button
-          type="button" className="bmgj-profile-secondary"
-          onClick={() => { setRoleText(target.role); setRoleEditing(false); }}
-        >
-          취소
-        </button>
-      )}
-    </form>
+    <RolePicker
+      current={target}
+      busy={roleBusy}
+      onSave={saveRole}
+      onCancel={target ? () => setRoleEditing(false) : undefined}
+    />
   );
 
   const footerText = notice || (loading ? '불러오는 중…'
+    : discharged ? (editing ? '입력을 마친 뒤 저장하기를 눌러주세요.' : '내 정보가 저장되어 있습니다.')
     : !target ? '지원 희망 분야를 선택해 주세요.'
       : roleEditing ? '지원 희망 분야를 수정 중입니다.'
         : editing ? '입력을 마친 뒤 저장하기를 눌러주세요.'
@@ -340,12 +294,14 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
         }
       }}
     >
+      <style>{myInfoCss}</style>
       <div className="bmgj-profile-header">
         <div>
           <p className="bmgj-profile-eyebrow">병무길잡이 · 내 정보</p>
-          <h2 id="bmgj-info-title">{target ? '나의 병역 지원' : '지원 분야 선택'}</h2>
+          <h2 id="bmgj-info-title">{discharged ? '내 정보' : target ? '나의 병역 지원' : '지원 분야 선택'}</h2>
           <p className="bmgj-profile-subtitle">
-            {target ? '희망 분야와 인적사항을 한곳에서 관리합니다' : '지원 희망 분야를 먼저 선택해 주세요'}
+            {discharged ? '인적사항과 화면 설정을 한곳에서 관리합니다'
+              : target ? '희망 분야와 인적사항을 한곳에서 관리합니다' : '지원 희망 분야를 먼저 선택해 주세요'}
           </p>
         </div>
         <button type="button" className="bmgj-profile-close" aria-label="내 정보 닫기" onClick={onClose}>×</button>
@@ -354,8 +310,9 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
       <div className="bmgj-profile-scroller">
         {loading ? (
           <p className="bmgj-profile-loading" role="status">저장된 정보를 읽는 중…</p>
-        ) : !target || roleEditing ? roleForm : (
+        ) : !discharged && (!target || roleEditing) ? roleForm : (
           <Fragment>
+            {!discharged && target && (
             <div className="bmgj-profile-deadline bmgj-role-deadline">
               <div className="bmgj-profile-section-heading">
                 <h3>나의 지원 D-Day</h3>
@@ -363,7 +320,7 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
               </div>
               <div className="bmgj-role-overview">
                 <div>
-                  <span className="bmgj-role-label">지원 희망 분야 · 키워드</span>
+                  <span className="bmgj-role-label">지원 희망 분야</span>
                   <strong className="bmgj-role-name">{target.role}</strong>
                   <span className="bmgj-role-date">
                     {nextSchedule ? recruitMonthLabel(nextSchedule) : '다음 접수 회차가 공식 발표되면 표시해요'}
@@ -394,11 +351,12 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
                   <p>마감된 모집은 D-Day로 표시하지 않아요. 새 회차가 공지되면 다음 마감일로 자동 변경됩니다.</p>
                 </div>
               )}
-              <div className="bmgj-role-deadline-foot">
-                <button type="button" className="bmgj-profile-text-button" onClick={() => setRoleEditing(true)}>
+              {/* 사용자 결정(2026-11-26): 글씨가 작던 두 버튼을 크게, 줄을 나눠 배치 */}
+              <div className="bmgj-role-actions">
+                <button type="button" className="bmgj-role-action bmgj-role-action-main" onClick={() => setRoleEditing(true)}>
                   지원 분야 변경
                 </button>
-                <button type="button" className="bmgj-profile-text-button" disabled={recruitLoading} onClick={refreshNow}>
+                <button type="button" className="bmgj-role-action" disabled={recruitLoading} onClick={refreshNow}>
                   {recruitLoading ? '새로고침 중…' : '일정 새로고침'}
                 </button>
               </div>
@@ -430,32 +388,17 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
                 병무청 이달의 모집계획 보기 ↗
               </a>
             </div>
+            )}
 
-            <div className="bmgj-profile-login">
-              <div>
-                <strong>병무청 공식 로그인</strong>
-                <p>병무민원에서 본인인증을 마치면 통합지원서 작성 안내가 자동으로 열려요. 안내에서 ‘예’를 누르면 인적사항이 이 패널에 자동으로 반영돼요.</p>
-              </div>
-              <a href={PORTAL_CONNECT_URL} target="_blank" rel="noopener noreferrer" className="bmgj-profile-login-button">
-                병무민원 접속하기 ↗
-              </a>
-              <p className="bmgj-profile-login-note">
-                병무청 안내와 유의사항을 확인하면 인적사항을 이 브라우저에 저장해요.
-              </p>
-              {syncedAt && (
-                <p className="bmgj-profile-sync-note" role="status">
-                  {`최근 인적사항 자동 반영: ${new Date(syncedAt).toLocaleString('ko-KR')}`}
-                </p>
-              )}
-            </div>
+            <LoginBox connectUrl={PORTAL_CONNECT_URL} syncedAt={syncedAt} />
 
             {editing ? (
-              <form id="bmgj-profile-form" onSubmit={save} className="bmgj-profile-form">
+              <form id="bmgj-profile-form" ref={formRef} onSubmit={save} className="bmgj-profile-form">
                 <div className="bmgj-profile-section-heading">
                   <h3>인적사항 입력</h3>
                   <span>브라우저에만 저장</span>
                 </div>
-                {PROFILE_FIELDS.map(inputField)}
+                <ProfileFormFields profile={profile} busy={busy} onChange={(next) => { dirty.current = true; setProfile(next); }} />
                 <div className="bmgj-profile-form-buttons">
                   <button type="submit" className="bmgj-profile-primary" disabled={busy}>
                     {busy ? '저장 중…' : '인적사항 저장하기'}
@@ -471,12 +414,15 @@ export function MyInfoPanel({ id, focusOnOpen, isMainPage, onClose }: MyInfoPane
                   <h3>저장된 인적사항</h3>
                   <button
                     type="button" className="bmgj-profile-text-button"
-                    onClick={() => { setEditing(true); window.setTimeout(() => firstInput.current?.focus(), 0); }}
+                    onClick={() => {
+                      setEditing(true);
+                      window.setTimeout(() => formRef.current?.querySelector<HTMLElement>('input,select')?.focus(), 0);
+                    }}
                   >
                     수정하기
                   </button>
                 </div>
-                <dl className="bmgj-profile-values">{PROFILE_FIELDS.map(valField)}</dl>
+                <ProfileValues profile={profile} />
                 <button
                   type="button" className="bmgj-profile-secondary bmgj-profile-delete"
                   onClick={() => setDeleteConfirm(!deleteConfirm)}
