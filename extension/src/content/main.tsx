@@ -10,6 +10,7 @@ import { loadPrefs } from '../storage/prefs';
 import { App } from '../ui/App';
 import { PortalApp } from '../portal/PortalApp';
 import { registerPALeft } from '../portal/p-a-left/register';
+import { registerPARight } from '../portal/p-a-right/register';
 import { openProfileGuideAfterLogin, startProfileSync } from '../profile/profileSync';
 import { findPortalFrame, readPortalMenu, restoreFrame } from '../portal/portalDom';
 import { MyInfoWidget } from '../ui/MyInfoButton';
@@ -90,6 +91,7 @@ function ensurePortalFont(): void {
  */
 async function startPortal(): Promise<void> {
   registerPALeft(); // 병무민원 세부 화면: 입영 준비 카드 6개(p-a-left)
+  registerPARight(); // 병무민원 세부 화면: 입영 준비 카드 6개(p-a-right)
   const frame = findPortalFrame();
   if (!frame) return; // 팝업 등 틀이 없는 포털 화면
   openProfileGuideAfterLogin(frame);
