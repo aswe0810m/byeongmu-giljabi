@@ -1,0 +1,53 @@
+# 배포(팀 결정 2026-11-26): 버전 태그(v0.6.0 등)를 푸시하면 GitHub 서버에서 확장을 빌드해
+# Releases에 설치용 zip을 올린다. dist는 저장소에 커밋하지 않는다.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      # 태그와 manifest.json·package.json의 버전이 다르면 멈춘다(버전 올리기를 잊은 경우).
+      - name: Check version matches tag
+        working-directory: extension
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./package.json').version")
+          MAN=$(node -p "require('./manifest.json').version")
+          echo "tag=$TAG package.json=$PKG manifest.json=$MAN"
+          if [ "$TAG" != "$PKG" ] || [ "$TAG" != "$MAN" ]; then
+            echo "::error::태그($TAG)와 package.json($PKG)·manifest.json($MAN)의 버전이 다릅니다."
+            exit 1
+          fi
+
+      - name: Build
+        working-directory: extension
+        run: |
+          npm ci
+          npm run build
+
+      # 압축을 풀면 폴더 하나가 생기고, 크롬에서 그 폴더를 바로 로드할 수 있게 묶는다.
+      - name: Zip
+        run: |
+          NAME="byeongmu-giljabi-${GITHUB_REF_NAME}"
+          cp -r extension/dist "$NAME"
+          zip -r "$NAME.zip" "$NAME"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: byeongmu-giljabi-${{ github.ref_name }}.zip
+          generate_release_notes: true

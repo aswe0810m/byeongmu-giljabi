@@ -52,22 +52,19 @@
 
 ## 다운로드
 
-아래 두 방법 중 하나로 저장소를 내려받습니다.
+저장소의 [**Releases**](https://github.com/aswe0810m/byeongmu-giljabi/releases) 페이지에서 최신 버전의
+`byeongmu-giljabi-v0.x.x.zip`을 내려받고 압축을 풉니다.
 
-- **ZIP으로 받기 (간단)**
-  저장소 페이지 위쪽의 초록색 **Code** 버튼 → **Download ZIP** → 받은 파일의 압축을 풉니다.
-- **git으로 받기**
-  ```bash
-  git clone https://github.com/aswe0810m/byeongmu-giljabi.git
-  ```
+> 저장소 페이지의 **Code → Download ZIP**에는 설치 파일(`dist`)이 들어 있지 않습니다.
+> 소스만 들어 있으므로 반드시 **Releases**에서 받아 주세요.
 
 ## 설치 방법 (크롬)
 
 1. 크롬 주소창에 `chrome://extensions` 를 입력합니다.
 2. 오른쪽 위 **개발자 모드**를 켭니다.
 3. **압축해제된 확장 프로그램을 로드합니다** 버튼을 누릅니다.
-4. 내려받은 폴더 안의 [`extension/dist`](extension/dist/) 폴더를 선택합니다.
-   (`extension` 폴더가 아니라 그 안의 **`dist`** 폴더를 선택해야 합니다.)
+4. 압축을 푼 **`byeongmu-giljabi-v0.x.x`** 폴더를 선택합니다.
+   (폴더 안에 `manifest.json`이 바로 보이는 폴더입니다.)
 5. 확장 프로그램 목록에 **병무길잡이**가 보이면 설치가 끝난 것입니다.
 
 > 설치한 뒤 이미 열려 있던 병무청 탭은 **새로고침**해야 바뀐 화면이 나타납니다.
@@ -113,15 +110,16 @@
 
 ## 새 버전으로 업데이트
 
-1. 위의 [다운로드](#다운로드) 방법으로 최신 버전을 다시 받습니다.
-   (git으로 받았다면 저장소 폴더에서 `git pull`)
-2. ZIP으로 받았다면, 기존에 로드했던 폴더를 새로 받은 파일로 바꿉니다.
-3. `chrome://extensions`에서 병무길잡이 카드의 **새로고침(↻)** 버튼을 누릅니다.
-4. 열려 있던 병무청 탭을 새로고침합니다.
+1. [Releases](https://github.com/aswe0810m/byeongmu-giljabi/releases)에서 새 버전 zip을 받아 압축을 풉니다.
+2. `chrome://extensions`에서 예전 병무길잡이를 **삭제**하고, 새 폴더를 [설치 방법](#설치-방법-크롬)대로 로드합니다.
+   (또는 예전에 로드한 폴더의 내용을 새 파일로 바꾼 뒤 병무길잡이 카드의 **새로고침(↻)**을 누릅니다.)
+3. 열려 있던 병무청 탭을 새로고침합니다.
+
+> 화면 그룹·내 정보 등 저장한 값은 확장을 삭제하면 지워집니다. 유지하려면 폴더 내용을 바꾸고 새로고침하는 방법을 쓰세요.
 
 ## 개발자용: 직접 빌드하기
 
-소스(`extension/src`)를 고친 뒤에는 `dist`를 다시 만들어야 합니다. ([Node.js](https://nodejs.org) 필요)
+소스(`extension/src`)를 고친 뒤 확인하려면 직접 빌드합니다. ([Node.js](https://nodejs.org) 필요)
 
 ```bash
 cd extension
@@ -129,8 +127,24 @@ npm install
 npm run build
 ```
 
-빌드가 끝나면 `chrome://extensions`에서 새로고침합니다.
-구현하면서 정한 세부 사항은 [`extension/docs/implementation-decisions.md`](extension/docs/implementation-decisions.md)에 정리되어 있습니다.
+`extension/dist` 폴더가 만들어집니다. `chrome://extensions`에서 이 폴더를 로드하거나 새로고침합니다.
+`dist`는 빌드 결과라서 **git에 커밋하지 않습니다**(`.gitignore`에 있음).
+
+### 배포 (버전 올리기)
+
+기능 PR이 모두 병합된 뒤 한 사람이 진행합니다.
+
+1. `extension/manifest.json`과 `extension/package.json`(+ `package-lock.json`)의 버전을 올려 PR로 병합합니다. 예: `0.6.0`
+2. main에서 같은 버전의 태그를 만들어 푸시합니다.
+   ```bash
+   git checkout main && git pull
+   git tag v0.6.0
+   git push origin v0.6.0
+   ```
+3. GitHub Actions(`.github/workflows/release.yml`)가 빌드해서 Releases에 `byeongmu-giljabi-v0.6.0.zip`을 올립니다.
+   태그와 파일의 버전이 다르면 실패합니다.
+
+구현하면서 정한 세부 사항은 [`extension/docs/`](extension/docs/)에 정리되어 있습니다.
 
 ## 🗺 진행 계획
 
