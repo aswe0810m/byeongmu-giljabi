@@ -21,7 +21,8 @@ html.bmgj-sub {
 
 html.bmgj-sub body { background: var(--bmgj-bg-page) !important; }
 
-/* ── 틀: [왼쪽 메뉴 | 본문] 두 칸. 원본은 float + 고정 너비(210px + 740px) ── */
+/* ── 틀: 본문 한 칸(전체 너비). 원본은 float + 고정 너비(왼쪽 메뉴 210px + 본문 740px).
+   디자인 통일(2026-11-26): 왼쪽 메뉴(#side)는 숨기고 새 왼쪽 메뉴도 두지 않는다. ── */
 html.bmgj-sub #secrion {
   float: none !important;
   width: auto !important;
@@ -37,17 +38,13 @@ html.bmgj-sub #secrion #container {
 }
 html.bmgj-sub #secrion #container > .text_bg {
   float: none !important;
-  display: grid !important;
-  grid-template-columns: 264px minmax(0, 1fr);
-  gap: 24px;
-  align-items: start;
+  display: block !important;
   width: auto !important;
   height: auto !important;
   margin: 0 !important;
   padding: 0 !important;
   background: none !important;
 }
-html.bmgj-sub #bmgj-sub-side { min-width: 0; }
 html.bmgj-sub #secrion #colgroup {
   float: none !important;
   display: block !important;
@@ -199,6 +196,55 @@ html.bmgj-sub #contents thead td {
 }
 html.bmgj-sub #contents tbody th { background: var(--bmgj-card) !important; font-weight: 600; }
 
+/* ── 탭(원본 .tab_top·.tab_common·.tab_01·.tab_02·.tab_text): 원본 파란 탭을 초록 둥근 탭으로 ──
+   디자인 통일(2026-11-26): a-m01-m05 테마(이재혁)의 탭 규칙을 모든 하위 페이지에 쓰도록 옮김. */
+html.bmgj-sub :is(#contents, #colgroup) :is(.tab_top, .tab_common, .tab_01, .tab_02, .tab_text, .tab_text1) { border-color: var(--bmgj-border) !important; }
+html.bmgj-sub :is(#contents, #colgroup) :is(.tab_top, .tab_common, .tab_01, .tab_02, .tab_text, .tab_text1) a {
+  background-color: var(--bmgj-surface) !important; color: var(--bmgj-text-sub) !important;
+  border-color: var(--bmgj-border) !important; border-radius: 9px; text-decoration: none;
+}
+html.bmgj-sub :is(#contents, #colgroup) :is(.tab_top, .tab_common, .tab_01, .tab_02, .tab_text, .tab_text1) li.on,
+html.bmgj-sub :is(#contents, #colgroup) :is(.tab_top, .tab_common, .tab_01, .tab_02, .tab_text, .tab_text1) li.on a {
+  background: var(--bmgj-brand) !important; color: #FFFFFF !important; border-color: var(--bmgj-brand) !important;
+}
+html.bmgj-sub :is(#contents, #colgroup) .tab_top ul { border-color: var(--bmgj-border) !important; }
+html.bmgj-sub :is(#contents, #colgroup) .tab_top li.on::after { border-top-color: var(--bmgj-brand) !important; background-image: none !important; }
+/* 원본의 #sub #contents 규칙보다 우선해 파란 선택 탭·배경 이미지까지 맞춘다. */
+html.bmgj-sub #sub #contents :is(.tab_top, .tab_01, .tab_02, .tab_text, .tab_text1) li.on,
+html.bmgj-sub #sub #contents :is(.tab_top, .tab_01, .tab_02, .tab_text, .tab_text1) li.on :is(a, span) { background: var(--bmgj-brand) !important; color: #FFFFFF !important; border-color: var(--bmgj-brand) !important; }
+html.bmgj-sub #sub #contents .tab_top li.on::after,
+html.bmgj-sub #sub #contents .tab_top li.on a::after { border-top-color: var(--bmgj-brand) !important; background-image: none !important; }
+/* 군별 세부 분야와 안내 단계 탭도 동일한 테마와 정렬을 사용한다. */
+html.bmgj-sub #contents :is(.tab_text, .tab_text1) > ul {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 10px; width: 100%; padding: 0; margin: 0;
+}
+html.bmgj-sub #contents :is(.tab_text, .tab_text1) li { min-width: 0; float: none; border-radius: 9px; }
+html.bmgj-sub #contents :is(.tab_text, .tab_text1) li a {
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  float: none; width: 100%; min-width: 0; height: auto; min-height: 44px;
+  margin: 0; padding: 10px 16px; line-height: 1.5; text-align: center;
+  background: var(--bmgj-highlight-bg) !important; color: var(--bmgj-brand) !important;
+  border: 1px solid var(--bmgj-border) !important; border-radius: 9px;
+}
+html.bmgj-sub #contents :is(.tab_text, .tab_text1) li.on a {
+  background: var(--bmgj-brand) !important; color: white !important; border-color: var(--bmgj-brand) !important;
+}
+html.bmgj-sub #contents :is(.tab_text, .tab_text1) li a span { position: static; }
+html.bmgj-sub #contents :is(.tab_01, .tab_02) { margin-bottom: 24px; }
+html.bmgj-sub :is(#contents, #colgroup) :is(.tab_01, .tab_02, .tab_common) > ul {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  box-sizing: border-box; width: 100%; padding: 0; margin: 0;
+}
+html.bmgj-sub :is(#contents, #colgroup) :is(.tab_01, .tab_02, .tab_common) > ul > li {
+  float: none; min-width: 0; margin: 0; border-radius: 9px; background-image: none !important;
+}
+html.bmgj-sub :is(#contents, #colgroup) :is(.tab_01, .tab_02, .tab_common) > ul > li > a {
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  min-height: 44px; padding: 10px 18px; line-height: 1.5; text-align: center;
+  background-image: none !important;
+}
+
 /* ── 본문 안 버튼 링크(span.button > a): 원본 회색 버튼·인라인 색 대신 둥근 버튼 ── */
 html.bmgj-sub #contents span.button {
   display: inline-flex;
@@ -256,22 +302,56 @@ html.bmgj-sub #contents .page a span {
 }
 html.bmgj-sub #contents .page a span.on { background: var(--bmgj-brand); color: #FFFFFF; }
 
-/* ── 본문 아래 만족도 조사(원본 기능 그대로, 모양만) ── */
+/* ── 본문 아래 만족도 조사(원본 기능 그대로, 모양만) ──
+   디자인 통일(2026-11-26): a-m01-m05 테마(이재혁)의 배치 규칙을 모든 하위 페이지에 쓰도록 옮김.
+   원본의 738px 제한·고정 높이·float를 풀고 [상담 전화] / [만족도 + 의견] / [담당 정보]를 넓게 배치한다. */
 html.bmgj-sub #secrion .page_info {
+  box-sizing: border-box;
+  width: 100% !important;
   max-width: none !important;
+  height: auto !important;
   margin: 32px 0 0 !important;
   border: 1px solid var(--bmgj-border) !important;
   border-radius: 16px;
   overflow: hidden;
+  background: var(--bmgj-surface);
+  color: var(--bmgj-text);
 }
+html.bmgj-sub #secrion .page_info :is(.customer, .research, .info) {
+  float: none !important; box-sizing: border-box; width: 100% !important; height: auto !important;
+}
+html.bmgj-sub #secrion .page_info .customer {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 20px; background: var(--bmgj-highlight-bg); border-color: var(--bmgj-border);
+}
+html.bmgj-sub #secrion .page_info .customer :is(.title, ul) { float: none; width: auto; padding: 0; margin: 0; }
+html.bmgj-sub #secrion .page_info .research { padding: 20px; }
+html.bmgj-sub #secrion .page_info .research > ul {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 18px 24px; padding: 0; margin: 0;
+}
+html.bmgj-sub #secrion .page_info .research > ul > li { float: none; padding: 0; margin: 0; line-height: 1.5; }
+html.bmgj-sub #secrion .page_info .research li.txt { flex: 1 1 260px; }
+html.bmgj-sub #secrion .page_info .research li.radio { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+html.bmgj-sub #secrion .page_info .research li.radio span { display: inline-flex; align-items: center; gap: 6px; padding: 0; margin: 0; }
+html.bmgj-sub #secrion .page_info .research li.radio label { width: auto; height: auto; white-space: nowrap; cursor: pointer; }
+html.bmgj-sub #secrion .page_info .research input[type="radio"] { flex: 0 0 auto; margin: 0; accent-color: var(--bmgj-brand); }
+html.bmgj-sub #secrion .page_info .research li.input { display: flex; align-items: center; gap: 12px; flex: 1 1 100%; min-width: 0; }
+html.bmgj-sub #secrion .page_info .research input[type="text"] {
+  float: none; box-sizing: border-box; flex: 1; min-width: 0; width: auto; height: 40px;
+  margin: 0; padding: 8px 12px; font: inherit; border: 1px solid var(--bmgj-border); border-radius: 8px;
+}
+html.bmgj-sub #secrion .page_info .research input[type="button"] {
+  float: none; width: auto; min-width: 64px; height: 40px; padding: 8px 16px;
+  background: var(--bmgj-brand); color: #FFFFFF; border: 1px solid var(--bmgj-brand); border-radius: 8px; cursor: pointer;
+}
+html.bmgj-sub #secrion .page_info .info { padding: 14px 20px; }
+html.bmgj-sub #secrion .page_info .info ul { display: flex; flex-wrap: wrap; gap: 8px 24px; padding: 0; margin: 0; }
+html.bmgj-sub #secrion .page_info .info li { margin: 0; line-height: 1.5; }
 
 /* ── 좁은 화면 ── */
 @media (max-width: 1279px) {
   html.bmgj-sub #secrion { padding: 0 24px !important; }
   html.bmgj-sub #bmgj-sub-footer { padding: 0 24px 96px; }
-}
-@media (max-width: 1023px) {
-  html.bmgj-sub #secrion #container > .text_bg { grid-template-columns: minmax(0, 1fr); gap: 16px; }
 }
 @media (max-width: 767px) {
   html.bmgj-sub #secrion { padding: 0 16px !important; }

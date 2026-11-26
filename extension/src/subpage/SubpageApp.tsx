@@ -1,36 +1,37 @@
-// 하위 페이지 새 화면(사용자 결정 2026-11-24). 메인과 같은 헤더·푸터·내 정보에
-// 경로·페이지 제목·왼쪽 메뉴를 새로 그리고, 본문은 원본을 그대로 둔 채 문서 CSS로 모양만 다듬는다.
+// 병무청 하위 페이지 공통 틀(사용자 결정 2026-11-24, 디자인 통일 2026-11-26).
+// 메인과 같은 헤더·푸터·내 정보에 "‹ 병무청 첫 화면" + 카드 배너(CardBanner)를 그리고,
+// 본문은 원본을 그대로 둔 채 문서 CSS로 모양만 다듬어 전체 너비로 보여 준다(왼쪽 메뉴는 숨김).
+// 병무민원 세부 화면(src/portal/page)과 같은 모양이다. 색만 병무청 초록.
 // 모집 공지사항 첫 화면은 본문 대신 군별 게시판을 합친 새 목록(NoticeBoard)을 보여 준다.
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { GroupId } from '../catalog/cards';
-import { GROUP_LABELS } from '../catalog/cards';
+import { GROUP_LABELS, SITE_ORIGIN } from '../catalog/cards';
 import type { MenuCategory } from '../menu/readAllMenu';
 import type { Prefs, ViewMode } from '../storage/prefs';
 import { saveGroup, saveViewMode, subscribePrefs } from '../storage/prefs';
 import { AllMenuDialog } from '../ui/AllMenuDialog';
+import { CardBanner } from '../ui/CardBanner';
 import { Footer } from '../ui/Footer';
 import { Header } from '../ui/Header';
 import { MyInfoWidget } from '../ui/MyInfoButton';
-import { Breadcrumb } from './Breadcrumb';
 import { NoticeBoard } from './notice/NoticeBoard';
 import type { NoticeRow } from './notice/readBoard';
 import type { Subpage } from './pages';
-import type { SubpageInfo } from './readSubpage';
-import { SideMenu } from './SideMenu';
 import type { SubpageDom, SubpageHosts } from './subpageDom';
-import { hideSubpageOriginal, restoreSubpageOriginal, setHostsVisible, setOriginalNoticeList } from './subpageDom';
+import {
+  hideSubpageOriginal, restoreSubpageOriginal, setHostsVisible, setOriginalNoticeList, setRootAttrs,
+} from './subpageDom';
 
 const SAVE_FAILED = '설정을 저장하지 못했어요. 다음 방문에는 다시 선택해야 할 수 있어요.';
 const TOAST_MS = 4000;
 
 /** 각 호스트의 Shadow DOM 안에 React가 그릴 자리. */
-export interface SubpageMounts { side: HTMLElement; notice: HTMLElement | null; footer: HTMLElement; }
+export interface SubpageMounts { notice: HTMLElement | null; footer: HTMLElement; }
 
 interface SubpageAppProps {
   page: Subpage;
   dom: SubpageDom;
-  info: SubpageInfo;
   hosts: SubpageHosts;
   mounts: SubpageMounts;
   initialPrefs: Prefs;
@@ -38,7 +39,7 @@ interface SubpageAppProps {
   noticeRows: NoticeRow[] | null;
 }
 
-export function SubpageApp({ page, dom, info, hosts, mounts, initialPrefs, allMenu, noticeRows }: SubpageAppProps) {
+export function SubpageApp({ page, dom, hosts, mounts, initialPrefs, allMenu, noticeRows }: SubpageAppProps) {
   const [group, setGroup] = useState<GroupId | null>(initialPrefs.group);
   const [viewMode, setViewMode] = useState<ViewMode>(initialPrefs.viewMode);
   const [allMenuOpen, setAllMenuOpen] = useState(false);
@@ -64,8 +65,9 @@ export function SubpageApp({ page, dom, info, hosts, mounts, initialPrefs, allMe
     } else {
       restoreSubpageOriginal();
     }
+    setRootAttrs(page.entry?.rootAttrs, improved);
     setHostsVisible(hosts, improved);
-  }, [improved, noticeOriginal, dom, hosts, page.kind, isNotice]);
+  }, [improved, noticeOriginal, dom, hosts, page.kind, page.entry, isNotice]);
 
   // 다른 탭의 변경 반영(메인과 같은 저장값).
   useEffect(
@@ -82,13 +84,13 @@ export function SubpageApp({ page, dom, info, hosts, mounts, initialPrefs, allMe
     for (const el of [frameRef.current, dom.section, hosts.footer]) el?.toggleAttribute('inert', allMenuOpen);
   }, [allMenuOpen, dom.section, hosts.footer]);
 
-  // 원본 건너뛰기 링크 `대메뉴로 바로가기`(#nav)는 숨긴 원본 메뉴를 가리키므로 새 왼쪽 메뉴로 보낸다.
+  // 원본 건너뛰기 링크 `대메뉴로 바로가기`(#nav)는 숨긴 원본 메뉴를 가리키므로 헤더의 메뉴 검색으로 보낸다.
   useEffect(() => {
     if (!improved) return;
     const onClick = (event: MouseEvent) => {
       const anchor = (event.target as Element | null)?.closest?.('a');
       if (!anchor || anchor.getAttribute('href') !== '#nav') return;
-      const target = mounts.side.querySelector<HTMLElement>('.bmgj-side');
+      const target = searchButtonRef.current;
       if (!target) return;
       event.preventDefault();
       target.scrollIntoView({ block: 'start' });
@@ -96,7 +98,7 @@ export function SubpageApp({ page, dom, info, hosts, mounts, initialPrefs, allMe
     };
     document.addEventListener('click', onClick, true);
     return () => document.removeEventListener('click', onClick, true);
-  }, [improved, mounts.side]);
+  }, [improved]);
 
   // 전환 뒤 새로 나타난 버튼으로 포커스를 옮긴다(누른 버튼이 사라지므로).
   useEffect(() => {
@@ -178,15 +180,9 @@ export function SubpageApp({ page, dom, info, hosts, mounts, initialPrefs, allMe
             onShowOriginal={showOriginal}
             originalButtonRef={originalButtonRef}
           />
-          <Breadcrumb crumbs={info.crumbs} />
-          <div className="bmgj-sub-head">
-            {info.sideTitle && <p className="bmgj-eyebrow">{info.sideTitle}</p>}
-            <h1 className="bmgj-sub-title">{isNotice ? '모집 공지사항' : info.title}</h1>
-          </div>
+          <CardBanner card={page.card} eyebrow="병무청" back={{ href: `${SITE_ORIGIN}/index.do`, label: '병무청 첫 화면' }} />
         </div>
       </div>
-
-      {createPortal(<SideMenu title={info.sideTitle} items={info.side} />, mounts.side)}
 
       {isNotice && mounts.notice && page.board && createPortal(
         noticeOriginal ? (

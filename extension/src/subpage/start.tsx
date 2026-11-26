@@ -1,5 +1,6 @@
 // 하위 페이지 새 화면 시작(사용자 결정 2026-11-24). content/main.tsx가 메인이 아닌 병무청 페이지에서 부른다.
-// 맡은 페이지가 아니거나 원본 틀이 다르면 false를 돌려주고, 그때는 기존처럼 내 정보 버튼만 붙는다.
+// 등록된 페이지(pages.ts의 registerSubpages, 모집 공지사항 게시판)가 아니거나 원본 틀이 다르면 false를 돌려주고,
+// 그때는 기존처럼 내 정보 버튼만 붙는다.
 import { Component, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { readAllMenu } from '../menu/readAllMenu';
@@ -7,15 +8,17 @@ import { loadPrefs } from '../storage/prefs';
 import baseStyles from '../ui/styles.css?inline';
 import contentStyles from './content.css?inline';
 import { readBoardList } from './notice/readBoard';
-import { detectSubpage } from './pages';
-import { readSubpage } from './readSubpage';
+import { detectSubpage, type Subpage } from './pages';
 import { SubpageApp, type SubpageMounts } from './SubpageApp';
 import subpageStyles from './subpage.css?inline';
-import { ensureDocStyle, ensureHosts, findSubpageDom, removeHosts, restoreSubpageOriginal } from './subpageDom';
+import {
+  ensureDocStyle, ensureHosts, ensurePageStyle, findSubpageDom, removeHosts, restoreSubpageOriginal, setRootAttrs,
+} from './subpageDom';
 
 const SHADOW_STYLES = `${baseStyles}\n${subpageStyles}`;
 
 let root: Root | null = null;
+let current: Subpage | null = null;
 
 /** 호스트에 Shadow DOM을 붙이고 React가 그릴 자리를 돌려준다. */
 function shadowMount(host: HTMLElement): HTMLElement {
@@ -34,6 +37,7 @@ function fail(error: unknown): void {
   try { root?.unmount(); } catch { /* 이미 정리됨 */ }
   root = null;
   restoreSubpageOriginal();
+  if (current) setRootAttrs(current.entry?.rootAttrs, false);
   removeHosts();
   document.getElementById('bmgj-root')?.remove();
 }
@@ -55,15 +59,15 @@ export async function startSubpage(): Promise<boolean> {
   }
   try {
     // 원본을 숨기기 전에 읽는다.
-    const info = readSubpage();
     const allMenu = readAllMenu();
     const noticeRows = page.kind === 'notice-list' && page.board ? readBoardList(document, page.board.id) : null;
     const prefs = await loadPrefs();
 
+    current = page;
     ensureDocStyle(contentStyles);
+    ensurePageStyle(page.entry?.docCss);
     const hosts = ensureHosts(dom, page.kind);
     const mounts: SubpageMounts = {
-      side: shadowMount(hosts.side),
       notice: hosts.notice ? shadowMount(hosts.notice) : null,
       footer: shadowMount(hosts.footer),
     };
@@ -73,7 +77,6 @@ export async function startSubpage(): Promise<boolean> {
         <SubpageApp
           page={page}
           dom={dom}
-          info={info}
           hosts={hosts}
           mounts={mounts}
           initialPrefs={prefs}
