@@ -133,6 +133,10 @@
 .bmgj-pmast-inner img { vertical-align: top; }
 /* 병무청 띠(31px)보다 9px 높으므로, 그만큼 위 여백을 줄여 헤더 위치를 메인과 맞춘다 */
 .bmgj-page--portal { padding-top: calc(var(--section-gap) - 9px); }
+/* 병무청 띠는 1,023px 이하에서 23px로 낮아진다(디자인 통일 2026-11-26 확인) → 17px을 줄여야 같은 위치 */
+@media (max-width: 1023px) {
+  .bmgj-page--portal { padding-top: calc(var(--section-gap) - 17px); }
+}
 
 .bmgj-container {
   max-width: calc(var(--content-max) + var(--gutter) * 2);
