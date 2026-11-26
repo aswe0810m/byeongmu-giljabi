@@ -1,0 +1,252 @@
+/* A-M01·A-M04·A-M05 진입 주소에만 적용하는 공통 테마.
+   주변 탐색 메뉴만 개선 화면에서 숨기고, 원본의 본문·링크·이벤트·입력 상태를 유지한다. */
+html[data-bmgj-a-m01-m05-theme] {
+  --bmgj-a-m01-m05-page: #F6F7F5;
+  --bmgj-a-m01-m05-surface: #FFFFFF;
+  --bmgj-a-m01-m05-line: #DFE8E2;
+  --bmgj-a-m01-m05-ink: #1D3530;
+  --bmgj-a-m01-m05-sub: #5D7068;
+  --bmgj-a-m01-m05-green: #266D54;
+  --bmgj-a-m01-m05-mint: #EDF5EF;
+  --bmgj-a-m01-m05-focus: #298773;
+  --bmgj-a-m01-m05-content-pad: 32px;
+  background: var(--bmgj-a-m01-m05-page);
+}
+html[data-bmgj-a-m01-m05-theme] body {
+  background: var(--bmgj-a-m01-m05-page) !important;
+  color: var(--bmgj-a-m01-m05-ink) !important;
+  font-family: "Pretendard GOV", "Malgun Gothic", sans-serif !important;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #contents *, #side_menu, #side_menu *, #top_layout, #sub_layout, #sub_layout *, #location_layout, #foot_layout) {
+  font-family: "Pretendard GOV", "Malgun Gothic", sans-serif !important;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#secrion, #sub_layout) { background: transparent !important; }
+/* 속성이 없는 원래 화면에서는 이 규칙이 적용되지 않아 메뉴와 너비가 함께 복원된다. */
+html[data-bmgj-a-m01-m05-theme] :is(#side, #container_box3, #important_site) { display: none !important; }
+html[data-bmgj-a-m01-m05-theme] #container {
+  width: 100% !important; max-width: 100% !important;
+}
+html[data-bmgj-a-m01-m05-theme] #container > .text_bg {
+  float: none !important; width: 100% !important; background-image: none !important;
+}
+html[data-bmgj-a-m01-m05-theme] #colgroup {
+  display: block !important; float: none !important; box-sizing: border-box;
+  width: 100% !important; padding-left: 0 !important; text-align: left;
+}
+html[data-bmgj-a-m01-m05-theme] #sub_head {
+  width: 100% !important; box-sizing: border-box; padding-inline: var(--bmgj-a-m01-m05-content-pad);
+}
+html[data-bmgj-a-m01-m05-theme] #colgroup > .tab_common {
+  box-sizing: border-box; padding-inline: var(--bmgj-a-m01-m05-content-pad);
+}
+html[data-bmgj-a-m01-m05-theme] #path { float: none !important; height: auto !important; margin: 24px 0 16px !important; }
+/* 본문 바깥의 만족도 조사도 기존 738px 제한과 내부 고정 폭을 함께 해제한다. */
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info {
+  box-sizing: border-box; width: 100% !important; max-width: none !important; height: auto !important;
+  margin: 30px auto !important; border-color: var(--bmgj-a-m01-m05-line); background: var(--bmgj-a-m01-m05-surface);
+  color: var(--bmgj-a-m01-m05-ink); font-family: "Pretendard GOV", "Malgun Gothic", sans-serif;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info :is(.customer, .research, .info) {
+  float: none !important; box-sizing: border-box; width: 100% !important; height: auto !important;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .customer {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 20px; background: var(--bmgj-a-m01-m05-mint); border-color: var(--bmgj-a-m01-m05-line);
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .customer :is(.title, ul) {
+  float: none; width: auto; padding: 0; margin: 0;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research { padding: 20px; }
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research > ul {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 18px 24px; padding: 0; margin: 0;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research > ul > li {
+  float: none; padding: 0; margin: 0; line-height: 1.5;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research li.txt { flex: 1 1 260px; }
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research li.radio {
+  display: flex; flex-wrap: wrap; gap: 12px 20px;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research li.radio span {
+  display: inline-flex; align-items: center; gap: 6px; padding: 0; margin: 0;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research li.radio label {
+  width: auto; height: auto; white-space: nowrap; cursor: pointer;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research input[type="radio"] {
+  flex: 0 0 auto; margin: 0; accent-color: var(--bmgj-a-m01-m05-green);
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research li.input {
+  display: flex; align-items: center; gap: 12px; flex: 1 1 100%; min-width: 0;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research input[type="text"] {
+  float: none; box-sizing: border-box; flex: 1; min-width: 0; width: auto; height: 40px;
+  margin: 0; padding: 8px 12px; font: inherit; border: 1px solid var(--bmgj-a-m01-m05-line); border-radius: 7px;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .research input[type="button"] {
+  float: none; width: auto; min-width: 64px; height: 40px; padding: 8px 16px;
+  background: var(--bmgj-a-m01-m05-green); color: white; border: 1px solid var(--bmgj-a-m01-m05-green); border-radius: 7px;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .info { padding: 14px 20px; }
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .info ul {
+  display: flex; flex-wrap: wrap; gap: 8px 24px; padding: 0; margin: 0;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#colgroup, #sub) .page_info .info li { margin: 0; line-height: 1.5; }
+/* 폭을 넓혀도 원문의 두 안내 묶음이 세 열로 흘러가지 않게 한다. 요소 순서는 유지한다. */
+html[data-bmgj-a-m01-m05-theme="overview"] #contents > .layout_h3 {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px;
+  box-sizing: border-box; padding: 0;
+}
+html[data-bmgj-a-m01-m05-theme="overview"] #contents > .layout_h3 > div {
+  min-width: 0; width: 100%; max-width: 420px; justify-self: center; margin: 0 !important;
+}
+html[data-bmgj-a-m01-m05-theme="overview"] #contents > .layout_h3 > div > div {
+  display: block !important; float: none !important; height: auto !important; margin: 0 0 36px !important;
+}
+html[data-bmgj-a-m01-m05-theme="overview"] #contents .board_box_private {
+  box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  width: 100% !important; min-height: 84px; padding: 14px 16px !important; margin: 0 0 12px !important;
+}
+html[data-bmgj-a-m01-m05-theme="overview"] #contents .conBlueBox {
+  display: flex !important; align-items: center; justify-content: center;
+  width: 100% !important; min-height: 48px; height: auto !important; box-sizing: border-box;
+  padding: 10px 16px; font-size: 16px !important; line-height: 1.4 !important; text-align: center !important;
+}
+/* 군 선택·신청 버튼은 원본의 작은 버튼 껍데기 대신 읽기 쉬운 크기와 간격을 쓴다. */
+html[data-bmgj-a-m01-m05-theme="overview"] #contents .button.small {
+  display: inline-flex !important; vertical-align: middle; height: auto !important;
+  margin: 0 !important; padding: 0 !important; background: transparent !important; border: 0 !important;
+  border-radius: 10px;
+}
+html[data-bmgj-a-m01-m05-theme="overview"] #contents .button.small a {
+  display: inline-flex !important; align-items: center; justify-content: center;
+  box-sizing: border-box; min-width: 66px; min-height: 44px;
+  padding: 10px 16px !important; font-size: 15px !important; line-height: 1.4 !important;
+  border-radius: 10px; white-space: nowrap;
+}
+html[data-bmgj-a-m01-m05-theme="overview"] #contents .list li:has(> .button.small) {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  padding: 0 !important; margin: 12px 0 18px; background: none !important; list-style: none;
+}
+html[data-bmgj-a-m01-m05-theme="overview"] #contents .list > li { margin-bottom: 16px; }
+html[data-bmgj-a-m01-m05-theme] #side_menu { box-sizing: border-box; }
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #container .text_bg) { background-color: var(--bmgj-a-m01-m05-surface) !important; }
+/* 카드 자체에 여백을 두어 제목·문단·표가 모서리에 붙지 않게 한다. */
+html[data-bmgj-a-m01-m05-theme] #contents {
+  box-sizing: border-box; padding: 32px var(--bmgj-a-m01-m05-content-pad) 40px !important;
+  border-radius: 18px; color: var(--bmgj-a-m01-m05-ink); line-height: 1.8;
+}
+html[data-bmgj-a-m01-m05-theme] #sub_head h2 { color: var(--bmgj-a-m01-m05-ink) !important; font-size: 29px; line-height: 1.4; }
+html[data-bmgj-a-m01-m05-theme] #sub_head { border-bottom-color: var(--bmgj-a-m01-m05-line) !important; }
+html[data-bmgj-a-m01-m05-theme] #side_title { background: var(--bmgj-a-m01-m05-green) !important; border-radius: 16px 16px 0 0; }
+html[data-bmgj-a-m01-m05-theme] #side_title :is(h2, span) { color: #FFFFFF !important; }
+html[data-bmgj-a-m01-m05-theme] #side_menu { border: 1px solid var(--bmgj-a-m01-m05-line); border-radius: 0 0 16px 16px; background: var(--bmgj-a-m01-m05-surface) !important; }
+html[data-bmgj-a-m01-m05-theme] #side_menu :is(a, li) { border-color: var(--bmgj-a-m01-m05-line) !important; }
+html[data-bmgj-a-m01-m05-theme] #side_menu a { color: var(--bmgj-a-m01-m05-sub) !important; }
+html[data-bmgj-a-m01-m05-theme] #side_menu li.on > :is(a, span) { background: var(--bmgj-a-m01-m05-mint) !important; color: var(--bmgj-a-m01-m05-green) !important; }
+html[data-bmgj-a-m01-m05-theme] #side_menu > ul > li.on { background: var(--bmgj-a-m01-m05-mint) !important; }
+html[data-bmgj-a-m01-m05-theme] #side_menu li.on > :is(a, span) a { color: var(--bmgj-a-m01-m05-green) !important; }
+html[data-bmgj-a-m01-m05-theme] #side #side_menu > ul > li.on > :is(a, span),
+html[data-bmgj-a-m01-m05-theme] #side #side_menu > ul > li.on > span > a { background: var(--bmgj-a-m01-m05-mint) !important; color: var(--bmgj-a-m01-m05-green) !important; }
+html[data-bmgj-a-m01-m05-theme] #important_site { background: var(--bmgj-a-m01-m05-surface) !important; border: 1px solid var(--bmgj-a-m01-m05-line) !important; border-radius: 14px; }
+html[data-bmgj-a-m01-m05-theme] #important_site a { color: var(--bmgj-a-m01-m05-sub) !important; }
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #colgroup) :is(.tab_top, .tab_common, .tab_01, .tab_02, .tab_text, .tab_text1) { border-color: var(--bmgj-a-m01-m05-line) !important; }
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #colgroup) :is(.tab_top, .tab_common, .tab_01, .tab_02, .tab_text, .tab_text1) a {
+  background-color: var(--bmgj-a-m01-m05-surface) !important; color: var(--bmgj-a-m01-m05-sub) !important;
+  border-color: var(--bmgj-a-m01-m05-line) !important; border-radius: 9px; text-decoration: none;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #colgroup) :is(.tab_top, .tab_common, .tab_01, .tab_02, .tab_text, .tab_text1) li.on,
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #colgroup) :is(.tab_top, .tab_common, .tab_01, .tab_02, .tab_text, .tab_text1) li.on a {
+  background: var(--bmgj-a-m01-m05-green) !important; color: #FFFFFF !important; border-color: var(--bmgj-a-m01-m05-green) !important;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #colgroup) .tab_top ul { border-color: var(--bmgj-a-m01-m05-line) !important; }
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #colgroup) .tab_top li.on::after { border-top-color: var(--bmgj-a-m01-m05-green) !important; background-image: none !important; }
+/* 원본의 #sub #contents 규칙보다 우선해 파란 선택 탭·배경 이미지까지 맞춘다. */
+html[data-bmgj-a-m01-m05-theme] #sub #contents :is(.tab_top, .tab_01, .tab_02, .tab_text, .tab_text1) li.on,
+html[data-bmgj-a-m01-m05-theme] #sub #contents :is(.tab_top, .tab_01, .tab_02, .tab_text, .tab_text1) li.on :is(a, span) { background: var(--bmgj-a-m01-m05-green) !important; color: #FFFFFF !important; border-color: var(--bmgj-a-m01-m05-green) !important; }
+html[data-bmgj-a-m01-m05-theme] #sub #contents .tab_top li.on::after,
+html[data-bmgj-a-m01-m05-theme] #sub #contents .tab_top li.on a::after { border-top-color: var(--bmgj-a-m01-m05-green) !important; background-image: none !important; }
+/* 군별 세부 분야와 안내 단계 탭도 동일한 테마와 정렬을 사용한다. */
+html[data-bmgj-a-m01-m05-theme] #contents :is(.tab_text, .tab_text1) > ul {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 10px; width: 100%; padding: 0; margin: 0;
+}
+html[data-bmgj-a-m01-m05-theme] #contents :is(.tab_text, .tab_text1) li { min-width: 0; float: none; border-radius: 9px; }
+html[data-bmgj-a-m01-m05-theme] #contents :is(.tab_text, .tab_text1) li a {
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  float: none; width: 100%; min-width: 0; height: auto; min-height: 44px;
+  margin: 0; padding: 10px 16px; line-height: 1.5; text-align: center;
+  background: var(--bmgj-a-m01-m05-mint) !important; color: var(--bmgj-a-m01-m05-green) !important;
+  border: 1px solid var(--bmgj-a-m01-m05-line) !important; border-radius: 9px;
+}
+html[data-bmgj-a-m01-m05-theme] #contents :is(.tab_text, .tab_text1) li.on a {
+  background: var(--bmgj-a-m01-m05-green) !important; color: white !important; border-color: var(--bmgj-a-m01-m05-green) !important;
+}
+html[data-bmgj-a-m01-m05-theme] #contents :is(.tab_text, .tab_text1) li a span { position: static; }
+html[data-bmgj-a-m01-m05-theme] #contents :is(.tab_01, .tab_02) { margin-bottom: 24px; }
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #colgroup) :is(.tab_01, .tab_02, .tab_common) > ul {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  box-sizing: border-box; width: 100%; padding: 0; margin: 0;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #colgroup) :is(.tab_01, .tab_02, .tab_common) > ul > li {
+  float: none; min-width: 0; margin: 0; border-radius: 9px; background-image: none !important;
+}
+html[data-bmgj-a-m01-m05-theme] :is(#contents, #colgroup) :is(.tab_01, .tab_02, .tab_common) > ul > li > a {
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  min-height: 44px; padding: 10px 18px; line-height: 1.5; text-align: center;
+  background-image: none !important;
+}
+html[data-bmgj-a-m01-m05-theme] #contents :is(h3, h4, h5) {
+  color: var(--bmgj-a-m01-m05-ink) !important; line-height: 1.55; margin-bottom: 16px;
+}
+html[data-bmgj-a-m01-m05-theme] #contents :is(p, li, td) { line-height: 1.85; }
+html[data-bmgj-a-m01-m05-theme] #contents a { color: var(--bmgj-a-m01-m05-green); text-underline-offset: 3px; }
+html[data-bmgj-a-m01-m05-theme] #contents .conBlueBox {
+  background: var(--bmgj-a-m01-m05-green) !important; color: #FFFFFF !important;
+  border-radius: 12px !important; border-color: var(--bmgj-a-m01-m05-green) !important;
+}
+html[data-bmgj-a-m01-m05-theme] #contents :is(.conBlueBox, .conBlueBox *) { font-family: inherit !important; }
+html[data-bmgj-a-m01-m05-theme] #contents :is(.board_box_private, .board_box) {
+  border: 1px solid var(--bmgj-a-m01-m05-line) !important; background: var(--bmgj-a-m01-m05-mint) !important; border-radius: 12px;
+}
+html[data-bmgj-a-m01-m05-theme] #contents :is(.board_box_private, .board_box) :is(p, strong) { color: var(--bmgj-a-m01-m05-green) !important; }
+html[data-bmgj-a-m01-m05-theme] #contents table { border-color: var(--bmgj-a-m01-m05-line) !important; border-collapse: collapse; }
+html[data-bmgj-a-m01-m05-theme] #contents table :is(th, td) { border-color: var(--bmgj-a-m01-m05-line) !important; padding: 14px 12px; }
+html[data-bmgj-a-m01-m05-theme] #contents table th { background: var(--bmgj-a-m01-m05-mint) !important; color: var(--bmgj-a-m01-m05-ink) !important; }
+html[data-bmgj-a-m01-m05-theme] #contents table td { background-color: var(--bmgj-a-m01-m05-surface) !important; color: var(--bmgj-a-m01-m05-ink); }
+html[data-bmgj-a-m01-m05-theme] #contents :is(input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="image"]), select, textarea) {
+  border-color: var(--bmgj-a-m01-m05-line); border-radius: 7px; color: var(--bmgj-a-m01-m05-ink);
+}
+html[data-bmgj-a-m01-m05-theme] #contents :is(input[type="radio"], input[type="checkbox"]) { accent-color: var(--bmgj-a-m01-m05-green); }
+html[data-bmgj-a-m01-m05-theme] #contents :is(button, input[type="button"], input[type="submit"], .button a, a.aButton) {
+  background-color: var(--bmgj-a-m01-m05-green) !important; color: #FFFFFF !important;
+  border-color: var(--bmgj-a-m01-m05-green) !important; border-radius: 8px;
+}
+html[data-bmgj-a-m01-m05-theme] #contents .button.gray4,
+html[data-bmgj-a-m01-m05-theme] #contents .button.gray4 a { background: var(--bmgj-a-m01-m05-green) !important; color: #FFFFFF !important; border-color: var(--bmgj-a-m01-m05-green) !important; }
+html[data-bmgj-a-m01-m05-theme] #contents .button.link a { background: var(--bmgj-a-m01-m05-green) !important; color: #FFFFFF !important; border-color: var(--bmgj-a-m01-m05-green) !important; }
+/* 남는 너비를 제목 칸에 주고 원본의 고정 폭·한 줄 말줄임·줄 수 제한을 해제한다. */
+html[data-bmgj-a-m01-m05-theme] #contents :is(table.board_notice, table.board_overflow) { table-layout: auto !important; width: 100% !important; }
+html[data-bmgj-a-m01-m05-theme] #contents :is(table.board_notice, table.board_overflow) :is(th, td) { height: auto !important; }
+html[data-bmgj-a-m01-m05-theme] #contents :is(table.board_notice, table.board_overflow) :is(td.text_left, td.subject, td.title) { width: auto !important; min-width: 0 !important; text-align: left; }
+html[data-bmgj-a-m01-m05-theme] #contents :is(table.board_notice, table.board_overflow) :is(td.text_left, td.subject, td.title) a,
+html[data-bmgj-a-m01-m05-theme] #contents :is(table.board_notice, table.board_overflow) :is(td.text_left, td.subject, td.title) a :is(strong, span) {
+  display: inline !important; width: auto !important; max-width: none !important; height: auto !important;
+  white-space: normal !important; text-overflow: clip !important; overflow: visible !important;
+  -webkit-line-clamp: unset !important; word-break: keep-all; overflow-wrap: anywhere; line-height: 1.7;
+}
+html[data-bmgj-a-m01-m05-theme] #contents :is(table.board_notice, table.board_overflow) :is(th, td):last-child { width: 76px !important; }
+html[data-bmgj-a-m01-m05-theme] #contents :is(table.board_notice, table.board_overflow) :is(th, td):nth-last-child(2) { width: 120px !important; white-space: nowrap; }
+html[data-bmgj-a-m01-m05-theme] :focus-visible { outline: 2px solid var(--bmgj-a-m01-m05-focus); outline-offset: 3px; }
+html[data-bmgj-a-m01-m05-theme] :is(#util_layout2, #top_layout, #location_layout, #foot_layout) { border-color: var(--bmgj-a-m01-m05-line) !important; }
+html[data-bmgj-a-m01-m05-theme] #top_layout { background-color: var(--bmgj-a-m01-m05-surface) !important; }
+html[data-bmgj-a-m01-m05-theme] #top_layout :is(h2 a, h3 a) { color: var(--bmgj-a-m01-m05-ink) !important; }
+html[data-bmgj-a-m01-m05-theme] #contents :is(.title, .title h2, #content_ttl) { color: var(--bmgj-a-m01-m05-ink) !important; }
+html[data-bmgj-a-m01-m05-theme] iframe#main { border: 0; }
+@media (max-width: 767px) {
+  html[data-bmgj-a-m01-m05-theme] { --bmgj-a-m01-m05-content-pad: 16px; }
+  html[data-bmgj-a-m01-m05-theme] #contents { padding-block: 24px 32px !important; }
+  html[data-bmgj-a-m01-m05-theme="overview"] #contents > .layout_h3 { grid-template-columns: 1fr; gap: 24px; }
+  html[data-bmgj-a-m01-m05-theme] #contents img { max-width: 100%; height: auto; }
+  html[data-bmgj-a-m01-m05-theme="overview"] #contents .layout_h3 > div > div { float: none !important; margin-right: 0 !important; height: auto !important; }
+}

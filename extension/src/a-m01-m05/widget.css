@@ -1,0 +1,16 @@
+.bmgj-a-m01-m05-toggle {
+  position: fixed; left: 16px; bottom: 24px; z-index: 2147483000;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 20px; height: 44px; box-sizing: border-box;
+  color: var(--text-link); background: var(--bg-surface); border: 1px solid var(--border); border-radius: 999px;
+  box-shadow: var(--float-shadow); cursor: pointer; font: inherit; font-weight: 600;
+}
+.bmgj-a-m01-m05-toggle:hover { background: #edf5ef; }
+.bmgj-a-m01-m05-toggle:focus-visible { outline: 2px solid #298773; outline-offset: 3px; }
+.bmgj-a-m01-m05-status {
+  position: fixed; left: 16px; bottom: 84px; z-index: 2147483001;
+  max-width: calc(100vw - 32px); padding: 12px 16px; box-sizing: border-box;
+  color: #1d3530; background: #fff; border: 1px solid #dfe8e2; border-radius: 12px;
+  box-shadow: 0 4px 14px #1d35301a; font: 14px/1.6 "Malgun Gothic", sans-serif;
+}
+@media (max-width: 767px) { .bmgj-a-m01-m05-toggle { bottom: 16px; } }

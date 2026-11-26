@@ -14,6 +14,7 @@ import { findPortalFrame, readPortalMenu, restoreFrame } from '../portal/portalD
 import { MyInfoWidget } from '../ui/MyInfoButton';
 import styles from '../ui/styles.css?inline';
 import { ROOT_ID, ensureRoot, findOriginalDom, removeRoot, restoreOriginal } from './mount';
+import { startAM01M05 } from '../a-m01-m05';
 
 function isMainPage(): boolean {
   return location.pathname === '/' || location.pathname === '/index.do';
@@ -117,6 +118,7 @@ async function startPortal(): Promise<void> {
 }
 
 async function start(): Promise<void> {
+  if (await startAM01M05()) return;
   if (location.hostname === 'mwpt.mma.go.kr') {
     // 내 정보(0.4.8): 통합지원서 화면은 포털 프레임 안에 열리므로 모든 프레임에서 인적사항 반영을 켠다.
     startProfileSync();
