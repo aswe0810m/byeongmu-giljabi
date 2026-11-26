@@ -1,16 +1,46 @@
-// 하위 페이지 새 화면을 적용할 주소(사용자 결정 2026-11-24).
-// 입영 준비·복무 중(A) 그룹 메인 카드 둘째 줄 5개(A-M06~A-M10)가 이동하는 병무청 페이지만 바꾼다.
-// 다른 카드의 페이지를 추가할 때는 이 파일의 목록에 주소를 넣으면 같은 공통 틀이 적용된다.
+// 병무청 하위 페이지 공통 틀 — 페이지 등록부.
+// 메인 카드를 눌러 들어간 병무청 페이지 중 "등록된 페이지"만 공통 틀(확장 헤더 + 카드 배너 + 본문 다듬기)로 보여 준다.
+// 각 담당 범위는 자기 폴더에서 registerSubpages()로 등록한다(예: ../a-m01-m05/register.ts).
+// 디자인 통일(2026-11-26): A-M01~A-M10이 모두 이 틀을 쓴다. 병무민원 세부 화면 등록부(src/portal/page/registry.ts)와 같은 방식.
 
+import { getCard, type HomeCard } from '../catalog/cards';
 import { NOTICE_BOARDS, type NoticeBoardDef } from './notice/boards';
 
-/** 공통 틀 + 본문 다듬기를 적용할 본문 페이지(contents.do?mc=...). 값은 카드 ID(기록용). */
-export const CONTENT_PAGES: Record<string, string> = {
-  usr0000167: 'A-M07', // 병역판정검사(병역판정검사 대상자)
-  mma0002909: 'A-M08', // 입영판정검사(입영판정검사란?)
-  usr0000174: 'A-M09', // 재학생 입영연기
-  usr0000295: 'A-M10', // 현역병 선발취소 및 입영일자 연기신청
-};
+export interface SubpageEntry {
+  /** contents.do?mc= 값 */
+  mc: string;
+  /** 이 페이지로 오는 메인 카드 ID(catalog/cards.ts). 배너에 그 카드의 아이콘·이름·설명이 나온다. */
+  cardId: string;
+  /** 이 페이지에만 넣을 문서 CSS. 선택자는 html.bmgj-sub 아래로 쓴다(원래 화면에서는 적용되지 않도록). */
+  docCss?: string;
+  /** 새 화면일 때 <html>에 붙일 속성(이 페이지만의 CSS가 고를 표식). 원래 화면으로 돌아가면 뗀다. */
+  rootAttrs?: Record<string, string>;
+}
+
+const contentPages = new Map<string, SubpageEntry>();
+
+/** 페이지를 등록한다. 같은 mc가 이미 있으면 먼저 등록한 것을 두고 콘솔에 알린다. */
+export function registerSubpages(entries: SubpageEntry[]): void {
+  for (const entry of entries) {
+    const existing = contentPages.get(entry.mc);
+    if (existing) {
+      console.error('[bmgj] subpage already registered', entry.mc, existing.cardId, entry.cardId);
+      continue;
+    }
+    contentPages.set(entry.mc, entry);
+  }
+}
+
+// A-M06~A-M10(오동규): 본문 페이지 4개. 모집 공지사항(A-M06)은 게시판이라 아래 NOTICE_CARD로 따로 처리한다.
+registerSubpages([
+  { mc: 'usr0000167', cardId: 'A-M07' }, // 병역판정검사(병역판정검사 대상자)
+  { mc: 'mma0002909', cardId: 'A-M08' }, // 입영판정검사(입영판정검사란?)
+  { mc: 'usr0000174', cardId: 'A-M09' }, // 재학생 입영연기
+  { mc: 'usr0000295', cardId: 'A-M10' }, // 현역병 선발취소 및 입영일자 연기신청
+]);
+
+/** 모집 공지사항 게시판(군별 5개)과 글 보기의 카드 */
+const NOTICE_CARD = 'A-M06';
 
 export type SubpageKind =
   | 'content'      // 본문 페이지: 공통 틀 + 본문 다듬기
@@ -20,6 +50,10 @@ export type SubpageKind =
 
 export interface Subpage {
   kind: SubpageKind;
+  /** 배너에 보여 줄 카드 */
+  card: HomeCard;
+  /** 본문 페이지면 등록 내용 */
+  entry: SubpageEntry | null;
   /** 게시판 페이지일 때 그 게시판 */
   board: NoticeBoardDef | null;
 }
@@ -41,23 +75,27 @@ function isFirstPlainPage(params: URLSearchParams): boolean {
   return !params.get('searchKeyword') && !formValue('searchKeyword') && !formValue('sdate') && !formValue('edate');
 }
 
-/** 지금 주소가 맡은 하위 페이지면 그 종류를, 아니면 null. */
+/** 지금 주소가 등록된 하위 페이지면 그 종류를, 아니면 null. 카드를 찾지 못하면(카드 데이터 변경 등) null. */
 export function detectSubpage(): Subpage | null {
   if (location.hostname !== 'www.mma.go.kr') return null;
   const params = new URLSearchParams(location.search);
   const path = location.pathname;
+  try {
+    if (path === '/contents.do') {
+      const codes = params.getAll('mc');
+      const entry = codes.length === 1 ? contentPages.get(codes[0]) : undefined;
+      return entry ? { kind: 'content', card: getCard(entry.cardId), entry, board: null } : null;
+    }
 
-  if (path === '/contents.do') {
-    const mc = params.get('mc');
-    return mc && mc in CONTENT_PAGES ? { kind: 'content', board: null } : null;
+    if (path === '/board/boardList.do' || path === '/board/boardView.do') {
+      const board = boardFrom(params.get('gesipan_id') ?? (formValue('gesipan_id') || null));
+      if (!board) return null;
+      const card = getCard(NOTICE_CARD);
+      if (path === '/board/boardView.do') return { kind: 'notice-view', card, entry: null, board };
+      return { kind: isFirstPlainPage(params) ? 'notice-list' : 'board-list', card, entry: null, board };
+    }
+  } catch (error) {
+    console.error('[bmgj] subpage card not found', error);
   }
-
-  if (path === '/board/boardList.do' || path === '/board/boardView.do') {
-    const board = boardFrom(params.get('gesipan_id') ?? (formValue('gesipan_id') || null));
-    if (!board) return null;
-    if (path === '/board/boardView.do') return { kind: 'notice-view', board };
-    return { kind: isFirstPlainPage(params) ? 'notice-list' : 'board-list', board };
-  }
-
   return null;
 }

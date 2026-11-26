@@ -15,9 +15,9 @@ import { openProfileGuideAfterLogin, startProfileSync } from '../profile/profile
 import { findPortalFrame, readPortalMenu, restoreFrame } from '../portal/portalDom';
 import { MyInfoWidget } from '../ui/MyInfoButton';
 import { startSubpage } from '../subpage/start';
+import { registerAM01M05 } from '../a-m01-m05/register';
 import styles from '../ui/styles.css?inline';
 import { ROOT_ID, ensureRoot, findOriginalDom, removeRoot, restoreOriginal } from './mount';
-import { startAM01M05 } from '../a-m01-m05';
 
 function isMainPage(): boolean {
   return location.pathname === '/' || location.pathname === '/index.do';
@@ -123,7 +123,6 @@ async function startPortal(): Promise<void> {
 }
 
 async function start(): Promise<void> {
-  if (await startAM01M05()) return;
   if (location.hostname === 'mwpt.mma.go.kr') {
     // 내 정보(0.4.8): 통합지원서 화면은 포털 프레임 안에 열리므로 모든 프레임에서 인적사항 반영을 켠다.
     startProfileSync();
@@ -134,7 +133,8 @@ async function start(): Promise<void> {
   // 원본 병무청 사이트의 프레임에는 추가 UI를 만들지 않는다.
   if (window.top !== window) return;
   if (!isMainPage()) {
-    // 하위 페이지 새 화면(A-M06~A-M10, 2026-11-24): 맡은 페이지가 아니면 기존처럼 내 정보 버튼만.
+    // 병무청 하위 페이지 공통 틀(A-M01~A-M10): 등록된 페이지가 아니면 기존처럼 내 정보 버튼만.
+    registerAM01M05();
     if (await startSubpage()) return;
     startWidgetOnly();
     return;

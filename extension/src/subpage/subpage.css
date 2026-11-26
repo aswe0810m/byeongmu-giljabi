@@ -1,77 +1,8 @@
-/* 하위 페이지 새 화면(Shadow DOM 안). 색·간격 변수는 ui/styles.css의 :host 값을 쓴다. */
+/* 병무청 하위 페이지 새 화면(Shadow DOM 안). 색·간격 변수는 ui/styles.css의 :host 값을 쓴다.
+   디자인 통일(2026-11-26): 위쪽은 헤더 + 카드 배너(ui/cardBanner.css). 경로·제목·왼쪽 메뉴 스타일은 없앰. */
 
-/* ── 위쪽: 헤더 + 경로 + 페이지 제목 ── */
-.bmgj-page--sub { padding-bottom: 0; }
-
-.bmgj-crumbs ol {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 4px;
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 14px;
-  color: var(--text-sub);
-}
-.bmgj-crumbs li { display: inline-flex; align-items: center; gap: 4px; }
-.bmgj-crumbs a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  color: var(--text-sub);
-  text-decoration: none;
-}
-.bmgj-crumbs a:hover { text-decoration: underline; }
-.bmgj-crumbs [aria-current="page"] { font-weight: 600; color: var(--text); }
-.bmgj-crumb-sep { flex: none; color: var(--text-muted); }
-
-.bmgj-sub-head { padding: 4px 0 var(--section-gap); }
-.bmgj-sub-title {
-  margin: 4px 0 0;
-  font-size: 32px;
-  font-weight: 800;
-  line-height: 1.3;
-  color: var(--text);
-}
-
-/* ── 왼쪽 메뉴 ── */
-.bmgj-side {
-  padding: 20px 12px;
-  border-radius: 24px;
-  background: var(--bg-surface);
-}
-.bmgj-side-title { margin: 0 0 8px; padding: 0 12px; font-size: 18px; font-weight: 700; color: var(--text); }
-.bmgj-side-toggle { display: none; }
-.bmgj-side-list,
-.bmgj-side-sub { margin: 0; padding: 0; list-style: none; }
-.bmgj-side-sub { margin: 2px 0 6px 12px; padding-left: 8px; border-left: 1px solid var(--border); }
-.bmgj-side-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  width: 100%;
-  min-height: 44px;
-  padding: 8px 12px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  font: inherit;
-  font-size: 15px;
-  line-height: 1.4;
-  text-align: left;
-  text-decoration: none;
-  color: var(--text-sub);
-  cursor: pointer;
-}
-.bmgj-side-link:hover { background: var(--choice-bg); color: var(--text); }
-.bmgj-side-sub .bmgj-side-link { font-size: 14px; }
-.bmgj-side-item.is-active > .bmgj-side-parent { font-weight: 700; color: var(--text); }
-.bmgj-side-link.is-current { background: var(--highlight-bg); font-weight: 700; color: var(--text); }
-.bmgj-side-chevron { flex: none; transition: transform 0.15s; }
-.bmgj-side-parent[aria-expanded="true"] .bmgj-side-chevron { transform: rotate(180deg); }
-@media (prefers-reduced-motion: reduce) { .bmgj-side-chevron { transition: none; } }
+/* 위쪽: 헤더 + 카드 배너. 배너와 본문 패널 사이 간격(병무민원 세부 화면과 같게) */
+.bmgj-page--sub { padding-bottom: var(--section-gap); }
 
 /* ── 모집 공지사항 새 목록 ── */
 .bmgj-notice:focus { outline: none; }
@@ -185,29 +116,7 @@
 .bmgj-strip--top { margin: 0 0 16px; }
 
 /* ── 좁은 화면 ── */
-@media (max-width: 1023px) {
-  .bmgj-side { padding: 8px; border-radius: 20px; }
-  .bmgj-side-title { display: none; }
-  .bmgj-side-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    min-height: 44px;
-    padding: 0 12px;
-    border: 0;
-    border-radius: 12px;
-    background: transparent;
-    font: inherit;
-    font-weight: 700;
-    color: var(--text);
-    cursor: pointer;
-  }
-  .bmgj-side-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
-  .bmgj-side[data-open="false"] .bmgj-side-list { display: none; }
-}
 @media (max-width: 767px) {
-  .bmgj-sub-title { font-size: 26px; }
   .bmgj-filter { flex-direction: column; gap: 4px; }
   .bmgj-notice-row { align-items: flex-start; flex-wrap: wrap; gap: 8px; }
   .bmgj-notice-main { flex-basis: 100%; }

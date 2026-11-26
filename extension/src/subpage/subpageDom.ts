@@ -1,4 +1,5 @@
 // 하위 페이지의 원본 영역 숨김·복원과 확장 화면 자리(Shadow DOM 호스트) 관리.
+// 디자인 통일(2026-11-26): 원본 왼쪽 메뉴(#side)는 숨기기만 하고 새 왼쪽 메뉴는 그리지 않는다(본문 전체 너비).
 // 본문(#contents)은 원본 그대로 두고(링크·버튼·스크립트가 원래대로 동작), 문서에 넣은 CSS로 모양만 다듬는다.
 
 import { ROOT_ID } from '../content/mount';
@@ -12,7 +13,7 @@ export interface SubpageDom {
   headerInner: HTMLElement | null;  // #krds-header .header-in
   section: HTMLElement;             // #secrion
   path: HTMLElement | null;         // #path (경로)
-  side: HTMLElement;                // #side (왼쪽 메뉴)
+  side: HTMLElement | null;         // #side (왼쪽 메뉴, 숨김)
   colgroup: HTMLElement;            // #colgroup (제목 + 본문)
   subHead: HTMLElement | null;      // #sub_head (페이지 제목)
   tabs: HTMLElement | null;         // .tab_common (군별 게시판 탭)
@@ -28,7 +29,7 @@ export function findSubpageDom(): SubpageDom | null {
   const side = document.getElementById('side');
   const colgroup = document.getElementById('colgroup');
   const contents = document.getElementById('contents');
-  if (!header || !section || !side || !colgroup || !contents || !side.parentElement) return null;
+  if (!header || !section || !colgroup || !contents) return null;
   return {
     header,
     headerInner: header.querySelector<HTMLElement>('.header-in'),
@@ -104,8 +105,7 @@ export function ensureDocStyle(css: string): void {
 }
 
 export interface SubpageHosts {
-  top: HTMLElement;          // 헤더·경로·제목 (#bmgj-root)
-  side: HTMLElement;         // 왼쪽 메뉴 (원본 #side 자리)
+  top: HTMLElement;          // 헤더·카드 배너 (#bmgj-root)
   notice: HTMLElement | null; // 합친 공지 목록 (원본 #contents 앞)
   footer: HTMLElement;       // 푸터 (#secrion 뒤)
 }
@@ -122,7 +122,6 @@ function ensureHost(id: string, place: (el: HTMLElement) => void): HTMLElement {
 export function ensureHosts(dom: SubpageDom, kind: SubpageKind): SubpageHosts {
   return {
     top: ensureHost(ROOT_ID, (el) => dom.header.insertAdjacentElement('afterend', el)),
-    side: ensureHost('bmgj-sub-side', (el) => dom.side.insertAdjacentElement('beforebegin', el)),
     notice: kind === 'notice-list'
       ? ensureHost('bmgj-sub-notice', (el) => dom.contents.insertAdjacentElement('beforebegin', el))
       : null,
@@ -132,7 +131,7 @@ export function ensureHosts(dom: SubpageDom, kind: SubpageKind): SubpageHosts {
 
 /** 원래 화면일 때 확장이 넣은 자리(맨 위 호스트 제외)를 접는다. :host 규칙보다 앞서도록 인라인 스타일로. */
 export function setHostsVisible(hosts: SubpageHosts, visible: boolean): void {
-  for (const el of [hosts.side, hosts.notice, hosts.footer]) {
+  for (const el of [hosts.notice, hosts.footer]) {
     if (!el) continue;
     if (visible) el.style.removeProperty('display');
     else el.style.setProperty('display', 'none', 'important');
@@ -140,5 +139,25 @@ export function setHostsVisible(hosts: SubpageHosts, visible: boolean): void {
 }
 
 export function removeHosts(): void {
-  for (const id of ['bmgj-sub-side', 'bmgj-sub-notice', 'bmgj-sub-footer']) document.getElementById(id)?.remove();
+  for (const id of ['bmgj-sub-notice', 'bmgj-sub-footer']) document.getElementById(id)?.remove();
+  document.getElementById(PAGE_STYLE_ID)?.remove();
+}
+
+const PAGE_STYLE_ID = 'bmgj-sub-page';
+
+/** 등록된 페이지만의 문서 CSS를 한 번만 넣는다(html.bmgj-sub 아래 규칙이라 원래 화면에서는 적용되지 않음). */
+export function ensurePageStyle(css: string | undefined): void {
+  if (!css || document.getElementById(PAGE_STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = PAGE_STYLE_ID;
+  style.textContent = css;
+  (document.head ?? document.documentElement).append(style);
+}
+
+/** 등록된 페이지의 <html> 표식을 붙이거나 뗀다. */
+export function setRootAttrs(attrs: Record<string, string> | undefined, on: boolean): void {
+  for (const [name, value] of Object.entries(attrs ?? {})) {
+    if (on) document.documentElement.setAttribute(name, value);
+    else document.documentElement.removeAttribute(name);
+  }
 }
