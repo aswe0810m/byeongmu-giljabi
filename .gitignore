@@ -1,2 +1,5 @@
 주차별_진행사항/
 node_modules/
+
+# 빌드 결과(팀 결정 2026-11-26): 커밋하지 않는다. 배포는 GitHub Releases(.github/workflows/release.yml)
+extension/dist/
