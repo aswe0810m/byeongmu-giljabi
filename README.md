@@ -117,35 +117,6 @@
 
 > 화면 그룹·내 정보 등 저장한 값은 확장을 삭제하면 지워집니다. 유지하려면 폴더 내용을 바꾸고 새로고침하는 방법을 쓰세요.
 
-## 개발자용: 직접 빌드하기
-
-소스(`extension/src`)를 고친 뒤 확인하려면 직접 빌드합니다. ([Node.js](https://nodejs.org) 필요)
-
-```bash
-cd extension
-npm install
-npm run build
-```
-
-`extension/dist` 폴더가 만들어집니다. `chrome://extensions`에서 이 폴더를 로드하거나 새로고침합니다.
-`dist`는 빌드 결과라서 **git에 커밋하지 않습니다**(`.gitignore`에 있음).
-
-### 배포 (버전 올리기)
-
-기능 PR이 모두 병합된 뒤 한 사람이 진행합니다.
-
-1. `extension/manifest.json`과 `extension/package.json`(+ `package-lock.json`)의 버전을 올려 PR로 병합합니다. 예: `0.6.0`
-2. main에서 같은 버전의 태그를 만들어 푸시합니다.
-   ```bash
-   git checkout main && git pull
-   git tag v0.6.0
-   git push origin v0.6.0
-   ```
-3. GitHub Actions(`.github/workflows/release.yml`)가 빌드해서 Releases에 `byeongmu-giljabi-v0.6.0.zip`을 올립니다.
-   태그와 파일의 버전이 다르면 실패합니다.
-
-구현하면서 정한 세부 사항은 [`extension/docs/`](extension/docs/)에 정리되어 있습니다.
-
 ## 🗺 진행 계획
 
 - [x] 주제 선정 및 제안서 작성
@@ -155,15 +126,6 @@ npm run build
 - [ ] 점수 확인 자동 입력
 - [ ] 테스트 및 문서화
 
-## 협업 방식
-
-팀원 전원이 저장소의 Collaborator로 등록되어 있어, 같은 저장소에서 함께 작업합니다.
-
-- `main` 브랜치는 항상 동작하는 상태로 유지합니다.
-- 기능별로 `feature/기능명` 브랜치를 만들어 작업합니다.
-  - 예: `feature/menu`, `feature/notice`, `feature/autofill`
-- 작업이 끝나면 `main`에 병합합니다.
-
 ## 팀원
 
 | 이름 | 역할 | GitHub |
@@ -172,3 +134,5 @@ npm run build
 | 이재혁 | 팀원 | [@RE2031](https://github.com/RE2031) |
 | 문준석 | 팀원 | [@junseok-dubu](https://github.com/junseok-dubu) |
 | 김도형 | 팀원 | [@kimdohyeong0204](https://github.com/kimdohyeong0204) |
+
+빌드, 브랜치, PR, 배포 같은 개발·협업 방식은 [CONTRIBUTING.md](CONTRIBUTING.md)에 있습니다.
