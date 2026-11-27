@@ -2,8 +2,8 @@
 // 이름은 병무청 누리집 공개 페이지에서 2026-11-26에 확인했다(출처는 각 목록 위 주석).
 // - 육군은 병무청 표기가 "기술행정병"이라 전문기술병 자리에 기술행정병을 둔다. 기술행정병은 군사특기를 골라 지원한다.
 // - 해군·해병대·공군 기술병은 계열을 골라 지원하고, 실제 특기는 입영 뒤에 나눈다 → 3단계 이름을 '계열'로 보여 준다.
-// - 해군·해병대·공군 전문특기병은 회차마다 모집 특기가 조금씩 달라서 최근 두 회차(26-11·26-12) 공고 본문을 합쳤다.
-// - 첨부파일(군사특기별 모집인원 등)은 문서뷰어에서 그림으로만 열려 이름 대조에는 공고 본문과 안내 페이지를 썼다.
+// - 전문특기병 목록은 고를 수 있는 전체 특기다. 지금 모집하는지는 각 군의 가장 최근 회차 공고 하나로만 판단하고
+//   (회차를 섞지 않음, src/profile/recruit.ts의 SPECIAL_BOARDS), 그 공고에 없는 특기는 '모집 일정 없음'으로 보여 준다(match.ts).
 
 export type BranchId = 'army' | 'navy' | 'marine' | 'airforce';
 export type KindId = 'general' | 'technical' | 'special';
@@ -31,7 +31,6 @@ export const SEARCH_THRESHOLD = 20;
 
 // 육군 기술행정병 147개 군사특기: 안내 및 지원절차 > 육군 > 기술행정병 > 군사특기임무 및 설명
 // https://www.mma.go.kr/conscription/recruit_service/procedure/army/S_board_text.do?mc=mma0000388&gun_gbcd=1&mojip_gbcd=1
-// 모집인원은 회차별 공고 첨부(예: https://www.mma.go.kr/board/boardView.do?gesipan_id=93&gsgeul_no=1523530&mc=usr0000150)
 const ARMY_TECHNICAL = [
   'K계열전차승무', 'M계열전차승무', 'K계열전차부대정비', 'M계열전차부대정비', '전차통신정비', '장갑차조종', '장갑차부대정비',
   'K-21보병전투차량승무', 'K-21보병전투차량부대정비', '견인포병', '155mm자주포병', 'K-55자주포조종', '견인포정비', 'K-55자주포정비',
@@ -62,9 +61,8 @@ export const ROLE_BRANCHES: RoleBranch[] = [
     kinds: [
       { id: 'general', label: '일반병', keyword: '일반병', unit: '특기', specialties: [] },
       { id: 'technical', label: '기술행정병', keyword: '기술행정병', unit: '특기', specialties: ARMY_TECHNICAL },
-      // 전문특기병: 안내 및 지원절차 > 육군 > 전문특기병 메뉴의 세부 특기(https://www.mma.go.kr/contents.do?mc=mma0000487)
-      // 어학병 7개: (어학병, 전문특기병) 2026년 11월 모집 계획(https://www.mma.go.kr/board/boardView.do?gesipan_id=93&gsgeul_no=1523308&mc=usr0000150)
-      // 이번 달 모집 특기: https://www.mma.go.kr/board/boardView.do?gesipan_id=93&gsgeul_no=1523523&mc=usr0000150
+      // 전문특기병 전체: 안내 및 지원절차 > 육군 > 전문특기병 메뉴의 세부 특기(https://www.mma.go.kr/contents.do?mc=mma0000487)
+      // 어학병 7개: 육군 어학병 모집 공고에 나온 언어(https://www.mma.go.kr/board/boardView.do?gesipan_id=93&gsgeul_no=1523308&mc=usr0000150)
       {
         id: 'special', label: '전문특기병', keyword: '전문특기병', unit: '특기',
         specialties: [
@@ -80,19 +78,20 @@ export const ROLE_BRANCHES: RoleBranch[] = [
   {
     id: 'navy',
     label: '해군',
-    // 26-12회차(https://www.mma.go.kr/board/boardView.do?gesipan_id=94&gsgeul_no=1523543&mc=usr0000151)
-    // 26-11회차(https://www.mma.go.kr/board/boardView.do?gesipan_id=94&gsgeul_no=1523322&mc=usr0000151)
     kinds: [
       { id: 'general', label: '일반병', keyword: '일반병', unit: '계열', specialties: [] },
+      // 계열: 26-12회차 모집계획(https://www.mma.go.kr/board/boardView.do?gesipan_id=94&gsgeul_no=1523543&mc=usr0000151)
       {
         id: 'technical', label: '전문기술병', keyword: '전문기술병', unit: '계열',
         specialties: ['전기', '정보통신', '조리', '항공', '기관', '화생방', '건축토목', '수송', '의무'],
       },
+      // 전문특기병 전체: 안내 및 지원절차 > 해군 > 전문특기병(https://www.mma.go.kr/contents.do?mc=mma0003452)
+      // 공고 표기에 맞춰 'AI병'은 'AI개발병', '빅데이터분석'은 '빅데이터분석병'으로 적었다.
       {
         id: 'special', label: '전문특기병', keyword: '전문특기병', unit: '특기',
         specialties: [
-          '군악병', '문화홍보병', '드론운용정비병', '통번역병', 'CBT병', 'AI개발병', '빅데이터분석병', 'SW개발병', '특전병',
-          '미디어병', '위생관리병', '전문정보병', '정보보호병', '지식재산관리병', '전문의무병', '어학병', '군종병',
+          '군악병', '문화홍보병', '특전병', '심해잠수병', '통번역병', '어학병', '전문정보병', '군종병', '지식재산관리병', '정보보호병',
+          'CBT병', 'AI개발병', 'SW개발병', '해군과학기술연구병', '빅데이터분석병', '전문의무병', '미디어병', '위생관리병', '드론운용정비병',
         ],
       },
     ],
@@ -100,18 +99,19 @@ export const ROLE_BRANCHES: RoleBranch[] = [
   {
     id: 'marine',
     label: '해병대',
-    // 26-12회차(https://www.mma.go.kr/board/boardView.do?gesipan_id=92&gsgeul_no=1523546&mc=usr0000385)
-    // 26-11회차(https://www.mma.go.kr/board/boardView.do?gesipan_id=92&gsgeul_no=1523320&mc=usr0000385)
     kinds: [
       { id: 'general', label: '일반병', keyword: '일반병', unit: '계열', specialties: [] },
+      // 계열: 26-12회차 모집계획(https://www.mma.go.kr/board/boardView.do?gesipan_id=92&gsgeul_no=1523546&mc=usr0000385)
       { id: 'technical', label: '전문기술병', keyword: '전문기술병', unit: '계열', specialties: ['수색', '화학', '공병', '무기정비', '수송'] },
-      { id: 'special', label: '전문특기병', keyword: '전문특기병', unit: '특기', specialties: ['군악병', '드론운용병', '콘텐츠운용병', '의장병'] },
+      // 전문특기병 전체: 안내 및 지원절차 > 해병대 > 전문특기병 > 모집계열별 지원자격(https://www.mma.go.kr/contents.do?mc=mma0003450)
+      { id: 'special', label: '전문특기병', keyword: '전문특기병', unit: '특기', specialties: ['군악병', '어학병', '의장병', '드론운용병', '콘텐츠운용병'] },
     ],
   },
   {
     id: 'airforce',
     label: '공군',
-    // 26-12회차(https://www.mma.go.kr/board/boardView.do?gesipan_id=95&gsgeul_no=1523542&mc=usr0000152)
+    // 계열: 26-12회차 모집안내(https://www.mma.go.kr/board/boardView.do?gesipan_id=95&gsgeul_no=1523542&mc=usr0000152)
+    // 전문특기병 전체: 안내 페이지(군사특기 임무 및 설명)가 목록을 글로 주지 않아 26-11·26-12회차 공고에 나온 특기를 모았다.
     // 26-11회차(https://www.mma.go.kr/board/boardView.do?gesipan_id=95&gsgeul_no=1523327&mc=usr0000152)
     kinds: [
       { id: 'general', label: '일반병', keyword: '일반병', unit: '계열', specialties: [] },

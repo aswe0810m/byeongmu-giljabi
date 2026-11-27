@@ -251,3 +251,14 @@ select.bmgj-profile-input {
 @media (max-width: 767px) {
   .bmgj-pick-options-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* ── 최신 모집 공고에 없는 특기(사용자 결정 2026-11-26): 공고 링크 */
+.bmgj-recruit-empty a {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: #206947;
+}

@@ -1,4 +1,4 @@
-// 내 정보 — 모집 일정(D-Day). 공개된 병무청 HTML(이달의 모집계획, 육군 모집계획 게시판)만 읽는다.
+// 내 정보 — 모집 일정(D-Day). 공개된 병무청 HTML(이달의 모집계획, 각 군 모집계획 게시판)만 읽는다.
 // 사용자 정보는 읽거나 보내지 않는다(credentials: 'omit'). 팀 구현 v0.5.1을 소스로 옮김(0.4.8). 동작은 그대로.
 
 export const RECRUIT_KEY = 'bmgj.recruitmentSchedules.v1';
@@ -19,7 +19,21 @@ export interface RecruitRecord {
   category: string;
 }
 
-export interface RecruitCache { checkedAt: number; records: RecruitRecord[]; source: string; }
+/** 전문특기병 일정을 판단하는 군(내 정보 roles.ts의 BranchId와 같은 값) */
+export type PostedBranch = 'army' | 'navy' | 'marine' | 'airforce';
+
+/**
+ * 각 군의 가장 최근 회차 모집 공고에서 읽은 전문특기병(어학병 포함) 모집 분야 글.
+ * (사용자 결정 2026-11-26) 회차를 섞지 않는다: 이 글에 없는 특기는 '모집 일정 없음'으로 보여 준다.
+ */
+export interface PostedNotice { title: string; url: string; text: string; }
+
+export interface RecruitCache {
+  checkedAt: number;
+  records: RecruitRecord[];
+  source: string;
+  posted?: Partial<Record<PostedBranch, PostedNotice>>;
+}
 
 interface DateToken { stamp: number; iso: string; text: string; index: number; endIndex: number; }
 
@@ -97,24 +111,46 @@ function record(data: Partial<RecruitRecord> & { startsAt: string; endsAt: strin
   };
 }
 
+const BRANCH_CELLS = ['육군', '해군', '해병대', '공군'];
+/** '‘27년 3월', '‘27. 3월~5월'처럼 입영월만 적힌 칸 */
+const MONTH_ONLY = /^[‘’'′]?\s*\d{2,4}\s*[.년]\s*\d{1,2}\s*월/;
+
 function mainTable(doc: Document): RecruitRecord[] {
   const records: RecruitRecord[] = [];
   for (const table of doc.querySelectorAll('table')) {
     const rows = Array.from(table.querySelectorAll('tr'));
     if (!rows.length || !/접수기간/.test(textOf(rows[0])) || !/모집분야/.test(textOf(rows[0]))) continue;
     let lastSection = '';
+    let lastRange: { startsAt: string; endsAt: string } | null = null;
+    let branch = '';
     for (let i = 1; i < rows.length; i++) {
       const cells = Array.from(rows[i].querySelectorAll('th,td'));
       if (cells.length < 2) continue;
       const raw = cells.map(textOf);
+      // 군별 칸은 '해 군'처럼 글자 사이를 띄어 쓰고, 아래 줄과 합쳐져(rowspan) 첫 줄에만 있다.
+      const branchCell = raw.map((v) => v.replace(/\s+/g, '')).find((v) => BRANCH_CELLS.includes(v));
+      if (branchCell) branch = branchCell;
       const dateIndex = raw.findIndex((v) => !!rangeFromText(v));
-      if (dateIndex < 0) continue;
-      const range = rangeFromText(raw[dateIndex])!;
-      const heading = raw.slice(0, dateIndex).filter((x) => !/^\d+$/.test(x.replace(/,/g, '')) && !dateTokens(x).length);
+      let range: { startsAt: string; endsAt: string };
+      let headingCells: string[];
+      if (dateIndex >= 0) {
+        range = rangeFromText(raw[dateIndex])!;
+        headingCells = raw.slice(0, dateIndex);
+        lastRange = range;
+      } else if (lastRange) {
+        // 접수기간 칸이 위 줄과 합쳐진(rowspan) 줄은 위 줄의 접수기간을 쓴다(예: 해병대·공군, 육군 군악·연고지복무병).
+        range = lastRange;
+        headingCells = raw;
+      } else continue;
+      const heading = headingCells
+        .filter((x) => !/^\d+$/.test(x.replace(/,/g, '')) && !dateTokens(x).length && !MONTH_ONLY.test(x) && !/^(없음|-)$/.test(x))
+        .map((x) => (BRANCH_CELLS.includes(x.replace(/\s+/g, '')) ? x.replace(/\s+/g, '') : x)); // '해 군' → '해군'
       const label = heading.join(' ').trim() || lastSection;
-      if (!label || !/(?:병|공군|해군|해병대)/.test(label)) continue;
+      if (!label || !/(?:병|공군|해군|해병대)/.test(label.replace(/\s+/g, ''))) continue;
       lastSection = label;
-      const r = record({ ...range, label, title: `${label} · 이달의 모집계획`, url: RECRUIT_INDEX_URL, specialties: kinds(label), source: '이달의 모집계획' });
+      // 군 이름이 없는 줄(육군 '군악' 등)도 어느 군 일정인지 알 수 있게 제목 앞에 군 이름을 붙인다.
+      const prefix = branch && !label.replace(/\s+/g, '').includes(branch) ? `${branch} ` : '';
+      const r = record({ ...range, label, title: `${prefix}${label} · 이달의 모집계획`, url: RECRUIT_INDEX_URL, specialties: kinds(label), source: '이달의 모집계획' });
       if (r) records.push(r);
     }
   }
@@ -205,6 +241,56 @@ async function fetchDoc(url: string): Promise<Document> {
   }
 }
 
+// ── 각 군 최신 회차 공고의 전문특기병 목록(2026-11-26 각 게시판에서 구조 확인)
+//   육군: 육군 모집계획(93)에서 제목에 '전문특기병'이 있는 가장 최근 글, 본문 '□ 모집 특기' 아래 '▶ 전문특기병 :'·'▶ 어학병 :'
+//   해군(94)·해병대(92)·공군(95): 제목에 'NN-N회차'(정기 회차, 추가모집은 세 자리라 제외)가 있는 가장 최근 글,
+//   본문 '■ 모집분야' 아래 '○ 전문특기병 △ …' 또는 '- 전문특기병 * …'
+const SPECIAL_BOARDS: { branch: PostedBranch; id: string; mc: string; pick: (title: string) => boolean }[] = [
+  { branch: 'army', id: '93', mc: 'usr0000150', pick: (t) => /전문특기병/.test(t) },
+  { branch: 'navy', id: '94', mc: 'usr0000151', pick: (t) => /\d{2}-\d{1,2}회차/.test(t) },
+  { branch: 'marine', id: '92', mc: 'usr0000385', pick: (t) => /\d{2}-\d{1,2}회차/.test(t) },
+  { branch: 'airforce', id: '95', mc: 'usr0000152', pick: (t) => /\d{2}-\d{1,2}회차/.test(t) },
+];
+
+/** 공고 본문에서 전문특기병·어학병 모집 분야 글만 뽑는다. 없으면 null. */
+export function specialSection(body: string): string | null {
+  const m = /[■□]\s*모집\s*(?:분야|특기)/.exec(body);
+  if (!m) return null;
+  let section = body.slice(m.index + 1);
+  const end = section.search(/[■□]/);
+  if (end > 0) section = section.slice(0, end);
+  section = section.slice(0, 2000);
+  const parts: string[] = [];
+  // '전문특기병 :', '전문특기병 △', '전문특기병 *' 처럼 목록이 바로 이어지는 곳만 본다(안내 문장 속 낱말은 뺀다).
+  for (const hit of section.matchAll(/(전문특기병|어학병)\s*[:：△*]/g)) {
+    let part = section.slice(hit.index ?? 0);
+    const stop = part.slice(hit[1].length).search(/[○▶■□]|\n\s*-\s/);
+    if (stop >= 0) part = part.slice(0, stop + hit[1].length);
+    parts.push(part.replace(/\s+/g, ' ').trim());
+  }
+  return parts.some((p) => p.startsWith('전문특기병')) ? parts.join(' | ').slice(0, 1500) : null;
+}
+
+async function latestSpecialNotice(board: typeof SPECIAL_BOARDS[number]): Promise<PostedNotice | null> {
+  const list = await fetchDoc(`https://www.mma.go.kr/board/boardList.do?gesipan_id=${board.id}&mc=${board.mc}`);
+  const posts: { no: string; title: string }[] = [];
+  for (const link of list.querySelectorAll('table tbody a')) {
+    const no = `${link.getAttribute('href') || ''} ${link.getAttribute('onclick') || ''}`.match(/gsgeul_no=(\d{6,})/)?.[1];
+    if (no && !posts.some((p) => p.no === no)) posts.push({ no, title: textOf(link) });
+  }
+  // 공지로 위에 고정된 글이 있어 글 번호(클수록 최근)로 다시 줄 세운다.
+  posts.sort((a, b) => Number(b.no) - Number(a.no));
+  for (const post of posts.filter((p) => board.pick(p.title)).slice(0, 4)) {
+    const url = `https://www.mma.go.kr/board/boardView.do?gesipan_id=${board.id}&gsgeul_no=${post.no}&mc=${board.mc}`;
+    const doc = await fetchDoc(url);
+    const text = specialSection(doc.body?.textContent || '');
+    if (!text) continue;
+    const title = (doc.querySelector('title')?.textContent || post.title).split('|')[0].trim().slice(0, 180);
+    return { title, url, text };
+  }
+  return null;
+}
+
 let refreshing: Promise<{ updated: boolean; reason?: string; count?: number }> | null = null;
 
 /** 병무청 누리집(www.mma.go.kr)에서만 공식 일정을 다시 읽는다(같은 출처 요청). 6시간 안에 읽었으면 건너뜀. */
@@ -224,7 +310,14 @@ export async function refreshRecruit(force = false): Promise<{ updated: boolean;
     }
     const cleaned = unique(records);
     if (cleaned.length === 0) throw Error('공식 일정에서 접수기간을 찾지 못했습니다.');
-    const result: RecruitCache = { checkedAt: Date.now(), records: cleaned, source: '병무청 이달의 모집계획 및 육군 모집계획' };
+    const posted: Partial<Record<PostedBranch, PostedNotice>> = {};
+    await Promise.all(SPECIAL_BOARDS.map(async (board) => {
+      try {
+        const found = await latestSpecialNotice(board);
+        if (found) posted[board.branch] = found;
+      } catch { /* 한 군 실패는 건너뜀(그 군은 예전처럼 모집 구분으로 찾는다) */ }
+    }));
+    const result: RecruitCache = { checkedAt: Date.now(), records: cleaned, source: '병무청 이달의 모집계획 및 각 군 모집계획', posted };
     await chrome.storage.local.set({ [RECRUIT_KEY]: result });
     return { updated: true, count: cleaned.length };
   })().finally(() => { refreshing = null; });
